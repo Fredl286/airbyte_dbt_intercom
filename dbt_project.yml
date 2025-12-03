@@ -22,6 +22,10 @@ models:
       materialized: view
 
 vars:
+
+  intercom_schema: AIRBYTE_SCHEMA
+  intercom_database: AIRBYTE_DATABASE
+
   airbyte_intercom:
     admins: "{{ source('airbyte_intercom','admins') }}"
     companies: "{{ source('airbyte_intercom','companies') }}"
