@@ -3,6 +3,8 @@ version: '0.1.0'
 require-dbt-version: ['>=1.0.0']
 config-version: 2
 profile: 'default'
+
+# Paths
 model-paths: ["models"]
 analysis-paths: ["analyses"]
 test-paths: ["tests"]
@@ -10,18 +12,26 @@ seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
+# Build artifacts
 target-path: "target"
 clean-targets:
   - "target"
   - "dbt_packages"
 
-models:
-  airbyte_intercom:
-    materialized: table
-    tmp:
-      materialized: view
+# Model configs
+models: 
+  airbyte_intercom: 
+  +materialized: table 
+  tmp: 
+    +materialized: view
 
+# Variables
 vars:
+  # Add your Snowflake schema + database overrides here
+  intercom_schema: AIRBYTE_SCHEMA       # replace with the schema where Airbyte lands Intercom data
+  intercom_database: AIRBYTE_DATABASE   # replace with your Snowflake database name
+
+  # Source definitions for the package
   airbyte_intercom:
     admins: "{{ source('airbyte_intercom','admins') }}"
     companies: "{{ source('airbyte_intercom','companies') }}"
