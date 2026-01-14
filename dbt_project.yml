@@ -21,9 +21,9 @@ clean-targets:
 # Model configs
 models: 
   airbyte_intercom: 
-  +materialized: table 
-  tmp: 
-    +materialized: view
+    +materialized: table 
+    tmp: 
+      +materialized: view
 
 # Variables
 vars:
