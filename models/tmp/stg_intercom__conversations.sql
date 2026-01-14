@@ -2,7 +2,7 @@ with conversation_rating as (
     select
         rating,
         remark,
-        _airbyte_conversations_hashid
+        _AIRBYTE_RAW_ID
     from {{ var('conversations_conversation_rating') }}
 ),
 
@@ -10,7 +10,7 @@ conversations_sla_applied as (
     select
         sla_name,
         sla_status,
-        _airbyte_conversations_hashid
+        _AIRBYTE_RAW_ID
     from {{ var('conversations_sla_applied') }}
 ),
 
@@ -20,14 +20,14 @@ conversations_assignee as (
         name as assignee_name,
         type as assignee_type,
         email as assignee_email,
-        _airbyte_conversations_hashid
+        _AIRBYTE_RAW_ID
     from {{ var('conversations_assignee') }}
 ),
 
 conversations_statistics as (
     select
         last_closed_by_id,
-        _airbyte_conversations_hashid
+        _AIRBYTE_RAW_ID
     from {{ var('conversations_statistics') }}
 ),
 
@@ -42,7 +42,8 @@ conversations as (
         title as conversation_title,
         state as conversation_state,
         read as is_read,
-        *
+        *,
+        _AIRBYTE_RAW_ID
     from {{ var('conversations') }}
 ),
 
@@ -59,11 +60,10 @@ final as (
         conversations_assignee.assignee_email,
         conversations_statistics.last_closed_by_id
     from conversations
-
-        left join conversation_rating using (_airbyte_conversations_hashid)
-        left join conversations_assignee using (_airbyte_conversations_hashid)
-        left join conversations_sla_applied using (_airbyte_conversations_hashid)
-        left join conversations_statistics using (_airbyte_conversations_hashid)
+        left join conversation_rating using (_AIRBYTE_RAW_ID)
+        left join conversations_assignee using (_AIRBYTE_RAW_ID)
+        left join conversations_sla_applied using (_AIRBYTE_RAW_ID)
+        left join conversations_statistics using (_AIRBYTE_RAW_ID)
 )
 
 select * from final

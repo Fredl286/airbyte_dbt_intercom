@@ -8,5 +8,7 @@ select
     session_count,
     user_count,
     website,
-    _airbyte_companies_hashid
+    -- use the actual Airbyte metadata columns instead of the missing hashid
+    _AIRBYTE_RAW_ID as airbyte_unique_id,
+    _AIRBYTE_EXTRACTED_AT as airbyte_extracted_at
 from {{ var('companies') }}
