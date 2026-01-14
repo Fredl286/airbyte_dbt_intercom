@@ -158,11 +158,6 @@ sources:
     tables:
       - name: admins
       - name: companies
-      - name: companies_plan
       - name: contacts
       - name: conversation_parts
       - name: conversations
-      - name: conversations_assignee
-      - name: conversations_conversation_rating
-      - name: conversations_sla_applied
-      - name: conversations_statistics
