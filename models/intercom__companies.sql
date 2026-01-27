@@ -1,5 +1,4 @@
 with companies as (
-
     select
         company_id,
         company_name,
@@ -10,9 +9,8 @@ with companies as (
         updated_at_timestamp,
         user_count,
         website,
-        _AIRBYTE_RAW_ID as raw_id  
+        airbyte_unique_id as raw_id
     from {{ ref('int_intercom__latest_company') }}
-
 )
 
 select * from companies
