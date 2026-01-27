@@ -12,5 +12,4 @@ with companies as (
         airbyte_unique_id as raw_id
     from {{ ref('int_intercom__latest_company') }}
 )
-
 select * from companies
