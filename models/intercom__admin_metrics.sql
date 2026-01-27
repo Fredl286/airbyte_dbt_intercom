@@ -29,8 +29,6 @@ median_metrics as (
         {{ fivetran_utils.percentile("conversation_metrics.count_assignments", "last_closed_by_id", "0.5") }} as median_conversation_assignments,
         {{ fivetran_utils.percentile("conversation_metrics.time_to_first_response_minutes", "last_closed_by_id", "0.5") }} as median_time_to_first_response_time_minutes
     from conversation_metrics
-
-    group by 1
 ),
 
 --Joins the aggregate, and median CTEs to the admin table with team enrichment. Distinct is necessary to keep grain with median values and aggregates.
