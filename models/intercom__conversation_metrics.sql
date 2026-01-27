@@ -11,9 +11,13 @@ metrics as (
         assignee_type,
         sla_status,
         conversation_rating,
-        -- Example metric: time between creation and last update
+        last_closed_by_id,
         datediff(day, created_at_timestamp, updated_at_timestamp) as days_open,
-        datediff(hour, created_at_timestamp, updated_at_timestamp) as hours_open
+        datediff(hour, created_at_timestamp, updated_at_timestamp) as hours_open,
+        count_total_parts,
+        count_reopens,
+        count_assignments,
+        time_to_first_response_minutes
     from conversations
 )
 
