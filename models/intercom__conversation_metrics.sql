@@ -19,7 +19,7 @@ metrics as (
         c.last_closed_by_id,
 
         -- bring in aggregates
-        pa.total_parts as count_total_parts,
+        pa.count_total_parts,
         pa.first_part_date,
         pa.last_part_date,
 
