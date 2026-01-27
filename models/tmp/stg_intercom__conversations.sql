@@ -7,16 +7,19 @@ with conversations as (
         created_at as created_at_epoch,
         updated_at as updated_at_epoch,
 
-        -- converted to TIMESTAMP, but aliased as *_timestamp for downstream compatibility
+        -- converted to TIMESTAMP
         {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_timestamp,
         {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_timestamp,
+
+        -- also expose as *_date for downstream models that expect that alias
+        {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_date,
+        {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_date,
 
         type as conversation_type,
         title as conversation_title,
         state as conversation_state,
         read as is_read,
 
-        -- nested JSON fields
         conversation_rating:rating::integer as conversation_rating_value,
         conversation_rating:remark::string as conversation_remark,
 
