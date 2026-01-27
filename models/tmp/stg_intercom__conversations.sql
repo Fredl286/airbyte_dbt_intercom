@@ -2,16 +2,21 @@ with conversations as (
 
     select
         id as conversation_id,
-        created_at as created_at_timestamp,
-        updated_at as updated_at_timestamp,
+
+        -- raw epoch values
+        created_at as created_at_epoch,
+        updated_at as updated_at_epoch,
+
+        -- converted to TIMESTAMP (Snowflake expects epoch seconds)
         {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_date,
         {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_date,
+
         type as conversation_type,
         title as conversation_title,
         state as conversation_state,
         read as is_read,
 
-        -- Extract nested JSON fields from VARIANT columns
+        -- nested JSON fields
         conversation_rating:rating::integer as conversation_rating_value,
         conversation_rating:remark::string as conversation_remark,
 
