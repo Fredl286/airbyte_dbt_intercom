@@ -161,3 +161,7 @@ sources:
       - name: contacts
       - name: conversation_parts
       - name: conversations
+      - name: conversation_rating
+      - name: conversations_sla_applied
+      - name: conversations_assignee
+      - name: conversations_statistics
