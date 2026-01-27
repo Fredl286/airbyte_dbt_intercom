@@ -2,8 +2,8 @@ with conversation_parts as (
     select
         conversation_id,
         part_id,
-        author:id::string as author_id,
-        author:type::string as author_type,
+        AUTHOR:id::string as author_id,
+        AUTHOR:type::string as author_type,
         part_type,
         created_at_timestamp,
         updated_at_timestamp,
