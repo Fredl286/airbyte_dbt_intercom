@@ -2,6 +2,8 @@ with latest_conversation as (
 
     select
         conversation_id,
+        created_at_timestamp,
+        updated_at_timestamp,
         created_at_date,
         updated_at_date,
         conversation_type,
@@ -22,7 +24,7 @@ with latest_conversation as (
 
     qualify row_number() over (
         partition by conversation_id
-        order by updated_at_date desc
+        order by updated_at_timestamp desc
     ) = 1
 
 )
