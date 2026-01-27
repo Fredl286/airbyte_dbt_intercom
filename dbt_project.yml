@@ -32,6 +32,7 @@ vars:
   # Add your Snowflake schema + database overrides here
   intercom_schema: AIRBYTE_SCHEMA       # raw Airbyte schema
   intercom_database: AIRBYTE_DATABASE   # raw Airbyte database
+  conversations_conversation_rating: CONVERSATION_RATING
 
   # Source definitions for the package
   airbyte_intercom:
