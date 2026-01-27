@@ -11,19 +11,19 @@ with conversations as (
         state as conversation_state,
         read as is_read,
 
-        -- Extract nested JSON objects directly from the conversations table
+        -- Extract nested JSON fields from VARIANT columns
         conversation_rating:rating::integer as conversation_rating_value,
         conversation_rating:remark::string as conversation_remark,
 
-        conversations_sla_applied:sla_name::string as sla_name,
-        conversations_sla_applied:sla_status::string as sla_status,
+        sla_applied:sla_name::string as sla_name,
+        sla_applied:sla_status::string as sla_status,
 
-        conversations_assignee:id::string as assignee_id,
-        conversations_assignee:name::string as assignee_name,
-        conversations_assignee:type::string as assignee_type,
-        conversations_assignee:email::string as assignee_email,
+        assignee:id::string as assignee_id,
+        assignee:name::string as assignee_name,
+        assignee:type::string as assignee_type,
+        assignee:email::string as assignee_email,
 
-        conversations_statistics:last_closed_by_id::string as last_closed_by_id,
+        statistics:last_closed_by_id::string as last_closed_by_id,
 
         _AIRBYTE_RAW_ID
     from {{ source('airbyte_intercom','conversations') }}
