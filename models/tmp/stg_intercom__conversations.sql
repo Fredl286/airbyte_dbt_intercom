@@ -7,9 +7,9 @@ with conversations as (
         created_at as created_at_epoch,
         updated_at as updated_at_epoch,
 
-        -- converted to TIMESTAMP (Snowflake expects epoch seconds)
-        {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_date,
-        {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_date,
+        -- converted to TIMESTAMP, but aliased as *_timestamp for downstream compatibility
+        {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_timestamp,
+        {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_timestamp,
 
         type as conversation_type,
         title as conversation_title,
