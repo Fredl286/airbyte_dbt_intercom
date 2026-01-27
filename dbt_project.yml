@@ -27,17 +27,21 @@ models:
       +materialized: view
       +schema: intercom_analytics
 
-# Variables
 vars:
-  # Add your Snowflake schema + database overrides here
-  intercom_schema: AIRBYTE_SCHEMA       # raw Airbyte schema
-  intercom_database: AIRBYTE_DATABASE   # raw Airbyte database
-  conversations_conversation_rating: CONVERSATION_RATING
+  # Raw Airbyte schema + database
+  intercom_schema: AIRBYTE_SCHEMA
+  intercom_database: AIRBYTE_DATABASE
 
-  # Source definitions for the package
+  # Conversation-related sources
+  conversations_conversation_rating: "{{ source('airbyte_intercom','conversation_rating') }}"
+  conversations_sla_applied: "{{ source('airbyte_intercom','conversations_sla_applied') }}"
+  conversations_assignee: "{{ source('airbyte_intercom','conversations_assignee') }}"
+  conversations_statistics: "{{ source('airbyte_intercom','conversations_statistics') }}"
+  conversations: "{{ source('airbyte_intercom','conversations') }}"
+
+  # Other Intercom entities
   airbyte_intercom:
     admins: "{{ source('airbyte_intercom','admins') }}"
     companies: "{{ source('airbyte_intercom','companies') }}"
     contacts: "{{ source('airbyte_intercom','contacts') }}"
     conversation_parts: "{{ source('airbyte_intercom','conversation_parts') }}"
-    conversations: "{{ source('airbyte_intercom','conversations') }}"
