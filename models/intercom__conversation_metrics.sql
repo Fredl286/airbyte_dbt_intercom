@@ -1,41 +1,21 @@
-with conversation_part_aggregates as (
+with conversations as (
     select *
-    from {{ ref('int_intercom__conversation_part_aggregates') }}
+    from {{ ref('intercom__conversations') }}
 ),
 
-conversations as(
- select *
- from {{ ref('intercom__conversations') }}
-),
-
---Returns time difference aggregates to the conversations_enhanced model. All time metrics are broken down to the second, then divided by 60 to reflect minutes without rounding errors.
-final as (
+metrics as (
     select
-         conversations.*,
-         conversation_part_aggregates.count_assignments,
-         conversation_part_aggregates.count_reopens,
-         conversation_part_aggregates.count_total_parts,
-         conversation_part_aggregates.first_admin_response_at,
-         conversation_part_aggregates.first_assignment_at,
-         conversation_part_aggregates.first_contact_reply_at,
-         conversation_part_aggregates.first_reopen_at,
-         conversation_part_aggregates.last_admin_response_at,
-         conversation_part_aggregates.last_assignment_at,
-         conversation_part_aggregates.last_contact_reply_at,
-         conversation_part_aggregates.last_reopen_at,
-
-         ({{ dbt_utils.datediff("conversations.created_at_date", "conversation_part_aggregates.first_assignment_at", 'second') }} /60) as time_to_first_assignment_minutes,
-
-         ({{ dbt_utils.datediff("conversations.created_at_date", "conversation_part_aggregates.first_admin_response_at", 'second') }} /60) as time_to_first_response_minutes,
-
-         ({{ dbt_utils.datediff("conversations.created_at_date", "conversation_part_aggregates.last_assignment_at", 'second') }} /60) as time_to_last_assignment_minutes
-
-    from conversation_part_aggregates
-
-    left join conversations
-        on conversations.conversation_id = conversation_part_aggregates.conversation_id
-
+        conversation_id,
+        conversation_type,
+        conversation_state,
+        assignee_type,
+        sla_status,
+        conversation_rating,
+        -- Example metric: time between creation and last update
+        datediff(day, created_at_timestamp, updated_at_timestamp) as days_open,
+        datediff(hour, created_at_timestamp, updated_at_timestamp) as hours_open
+    from conversations
 )
 
 select *
-from final
+from metrics
