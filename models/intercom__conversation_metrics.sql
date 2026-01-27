@@ -20,6 +20,10 @@ metrics as (
 
         -- bring in aggregates
         pa.count_total_parts,
+        pa.count_reopens,
+        pa.count_assignments,
+        pa.time_to_first_response_minutes,
+        pa.time_to_last_close_minutes,
         pa.first_part_date,
         pa.last_part_date,
 

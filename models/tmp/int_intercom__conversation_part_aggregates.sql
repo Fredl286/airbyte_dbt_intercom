@@ -2,7 +2,9 @@ with conversation_parts as (
     select
         conversation_id,
         part_id,
-        author_id,
+        author:id::string as author_id,
+        author:type::string as author_type,
+        part_type,
         created_at_timestamp,
         updated_at_timestamp,
         created_at_date,
@@ -18,11 +20,34 @@ latest_conversation as (
 aggregates as (
     select
         cp.conversation_id,
-        count(*) as count_total_parts,              -- ✅ renamed to match downstream
+
+        -- total parts
+        count(*) as count_total_parts,
+
+        -- reopen and assignment counts
+        sum(case when lower(cp.part_type) = 'reopen' then 1 else 0 end) as count_reopens,
+        sum(case when lower(cp.part_type) = 'assignment' then 1 else 0 end) as count_assignments,
+
+        -- first/last part timestamps and dates
         min(cp.created_at_timestamp) as first_part_timestamp,
         max(cp.updated_at_timestamp) as last_part_timestamp,
         min(cp.created_at_date) as first_part_date,
         max(cp.updated_at_date) as last_part_date,
+
+        -- time to first admin response (minutes)
+        datediff(
+            minute,
+            min(cp.created_at_timestamp),
+            min(case when cp.author_type = 'admin' then cp.created_at_timestamp end)
+        ) as time_to_first_response_minutes,
+
+        -- time to last close (minutes)
+        datediff(
+            minute,
+            min(cp.created_at_timestamp),
+            max(case when lower(cp.part_type) = 'close' then cp.created_at_timestamp end)
+        ) as time_to_last_close_minutes,
+
         lc.updated_at_timestamp as latest_conversation_timestamp,
         lc.updated_at_date as latest_conversation_date
     from conversation_parts cp
