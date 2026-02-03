@@ -14,10 +14,11 @@ tags_exploded as (
     where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
 ),
 
+-- ensure one row per contact_id
 contacts as (
-    select
+    select distinct
         c.id as contact_id,
-        c.custom_attributes,
+        nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
         c.phone,
         c.email
     from {{ source('airbyte_intercom','contacts') }} c
@@ -34,21 +35,17 @@ pivoted as (
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
-),
-
-transformed as (
-    select
-        p.conversation_id,
-        p.contact_id,
-        p.started_at,
-        p.completed_at,
-        p.tags_applied,
-        nullif(rtrim(ct.custom_attributes:"vulcan_id"::string), '') as vulcan_id,  -- ✅ null if blank
-        ct.phone,
-        ct.email
-    from pivoted p
-    left join contacts ct
-      on p.contact_id = ct.contact_id
 )
 
-select * from transformed
+select
+    p.conversation_id,
+    p.contact_id,
+    p.started_at,
+    p.completed_at,
+    p.tags_applied,
+    ct.vulcan_id,
+    ct.phone,
+    ct.email
+from pivoted p
+left join contacts ct
+  on p.contact_id = ct.contact_id
