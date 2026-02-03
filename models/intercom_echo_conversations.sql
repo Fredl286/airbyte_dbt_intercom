@@ -19,7 +19,7 @@ transformed as (
     select
         conversation_id,
         tag_name,
-        to_timestamp(applied_at_unix) as applied_at
+        to_timestamp(applied_at_unix) as applied_at,   -- ✅ keep as timestamp
         coalesce(rtrim(custom_attributes:"Vulcan ID"::string), '') as vulcan_id,
         contacts:"contacts"[0]:"id"::string as contact_id
     from tags_exploded
