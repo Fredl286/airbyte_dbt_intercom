@@ -12,7 +12,7 @@ tags_exploded as (
         r.custom_attributes
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO Main')
+    where t.value:"name"::string in ('Completed ECHO Main')
 ),
 
 transformed as (
