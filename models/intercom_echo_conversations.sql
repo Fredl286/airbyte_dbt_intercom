@@ -11,13 +11,15 @@ tags_exploded as (
         r.contacts:"contacts"[0]:"id"::string as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
+    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO Main')
 ),
 
 contacts as (
     select
         c.id as contact_id,
-        c.custom_attributes
+        c.custom_attributes,
+        c.phone,
+        c.email
     from {{ source('airbyte_intercom','contacts') }} c
 ),
 
@@ -27,9 +29,9 @@ pivoted as (
         te.contact_id,
         max(case when te.tag_name = 'Started ECHO Main'
                  then to_timestamp(te.applied_at_unix) end) as started_at,
-        max(case when te.tag_name = 'Completed ECHO main'
+        max(case when te.tag_name = 'Completed ECHO Main'
                  then to_timestamp(te.applied_at_unix) end) as completed_at,
-        listagg(distinct te.tag_name, ', ') as tags_applied   -- ✅ removed ORDER BY
+        listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
 ),
@@ -41,7 +43,9 @@ transformed as (
         p.started_at,
         p.completed_at,
         p.tags_applied,
-        coalesce(rtrim(ct.custom_attributes:"vulcan_id"::string), '') as vulcan_id
+        coalesce(rtrim(ct.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
+        ct.phone,
+        ct.email
     from pivoted p
     left join contacts ct
       on p.contact_id = ct.contact_id
