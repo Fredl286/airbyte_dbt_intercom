@@ -151,6 +151,22 @@ models:
       - name: conversation_remark
         description: Optional remark corresponding to rating.
 
+  - name: intercom_echo_conversations
+    description: >
+      Each record represents a conversation tag event (Started/Completed ECHO Main),
+      enriched with Vulcan ID and contact ID.
+    columns:
+      - name: conversation_id
+        description: Unique identifier for the conversation.
+      - name: tag_name
+        description: Tag applied (Started/Completed ECHO Main).
+      - name: applied_at
+        description: Time the tag was applied (dd/mm/yyyy hh:mm:ss).
+      - name: vulcan_id
+        description: Vulcan ID from custom attributes (blank if missing).
+      - name: contact_id
+        description: Contact ID from contacts object.
+
 sources:
   - name: airbyte_intercom
     schema: "{{ var('intercom_schema', 'intercom') }}"
