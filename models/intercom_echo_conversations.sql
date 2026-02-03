@@ -12,14 +12,14 @@ tags_exploded as (
         r.custom_attributes
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in ('Completed ECHO Main')
+    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
 ),
 
 transformed as (
     select
         conversation_id,
         tag_name,
-        to_timestamp(applied_at_unix) as applied_at,   -- ✅ keep as timestamp
+        to_char(to_timestamp(applied_at_unix), 'DD/MM/YYYY HH24:MI:SS') as applied_at,
         coalesce(rtrim(custom_attributes:"Vulcan ID"::string), '') as vulcan_id,
         contacts:"contacts"[0]:"id"::string as contact_id
     from tags_exploded
