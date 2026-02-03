@@ -11,7 +11,7 @@ tags_exploded as (
         r.contacts:"contacts"[0]:"id"::string as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO Main')
+    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
 ),
 
 contacts as (
@@ -29,7 +29,7 @@ pivoted as (
         te.contact_id,
         max(case when te.tag_name = 'Started ECHO Main'
                  then to_timestamp(te.applied_at_unix) end) as started_at,
-        max(case when te.tag_name = 'Completed ECHO Main'
+        max(case when te.tag_name = 'Completed ECHO main'
                  then to_timestamp(te.applied_at_unix) end) as completed_at,
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
