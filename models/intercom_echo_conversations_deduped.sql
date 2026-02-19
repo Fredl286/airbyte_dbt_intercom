@@ -1,7 +1,6 @@
 {{ config(materialized='table') }}
 
 -- 1. Base table WITH SAFE REMOVAL of test/internal emails
---    This keeps NULL emails and removes only actual matches.
 with base as (
     select *
     from {{ ref('intercom_echo_conversations') }}
@@ -49,49 +48,50 @@ vulcan_backfilled as (
     from deduped_conversation
 ),
 
--- 5. Add daily grouping
-daily_scored as (
+-- 5. Create 3-day grouping key
+three_day_grouped as (
     select
         *,
-        date(started_at) as started_date,
-        case when completed_at is not null then 2 else 0 end
-        + case when vulcan_id_filled is not null then 1 else 0 end
-        as daily_score
+        floor(datediff('day', '1970-01-01', started_at) / 3) as three_day_group
     from vulcan_backfilled
 ),
 
--- 6. Dedupe per contact_id per day
-ranked_daily as (
+-- 6. Dedupe per contact_id per 3-day window
+ranked_3day as (
     select
         *,
         row_number() over (
-            partition by contact_id, started_date
-            order by daily_score desc, completed_at desc, started_at desc
-        ) as rn_daily
-    from daily_scored
+            partition by contact_id, three_day_group
+            order by 
+                case when completed_at is not null then 2 else 0 end
+              + case when vulcan_id_filled is not null then 1 else 0 end desc,
+                completed_at desc,
+                started_at desc
+        ) as rn_3day
+    from three_day_grouped
 ),
 
-deduped_daily as (
+deduped_3day as (
     select *
-    from ranked_daily
-    where rn_daily = 1
+    from ranked_3day
+    where rn_3day = 1
 ),
 
--- 7. Dedupe per contact_id per day per phone+email
+-- 7. Dedupe per contact_id per 3-day window per phone+email
 phone_email_scored as (
     select
         *,
         case when completed_at is not null then 2 else 0 end
         + case when vulcan_id_filled is not null then 1 else 0 end
         as pe_score
-    from deduped_daily
+    from deduped_3day
 ),
 
 ranked_phone_email as (
     select
         *,
         row_number() over (
-            partition by contact_id, started_date, phone, email
+            partition by contact_id, three_day_group, phone, email
             order by pe_score desc, completed_at desc, started_at desc
         ) as rn_pe
     from phone_email_scored
@@ -103,7 +103,7 @@ deduped_phone_email as (
     where rn_pe = 1
 ),
 
--- 8. Dedupe per contact_id per day per vulcan_id
+-- 8. Dedupe per contact_id per 3-day window per vulcan_id
 vulcan_scored as (
     select
         *,
@@ -117,7 +117,7 @@ ranked_vulcan as (
     select
         *,
         row_number() over (
-            partition by contact_id, started_date, vulcan_id_filled
+            partition by contact_id, three_day_group, vulcan_id_filled
             order by v_score desc, completed_at desc, started_at desc
         ) as rn_vulcan
     from vulcan_scored
