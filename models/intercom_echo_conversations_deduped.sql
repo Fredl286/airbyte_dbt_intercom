@@ -3,8 +3,6 @@
 with base as (
     select *
     from {{ ref('intercom_echo_conversations') }}
-    where email not ilike '%payplan.com%'
-      and email not ilike '%@test.com%'
 ),
 
 scored as (
