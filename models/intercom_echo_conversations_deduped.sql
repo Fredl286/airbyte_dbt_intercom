@@ -61,7 +61,7 @@ deduped_daily as (
     where rn_daily = 1
 ),
 
--- 6. NEW: dedupe per contact_id per day per phone+email
+-- 6. Dedupe per contact_id per day per phone+email
 phone_email_scored as (
     select
         *,
@@ -81,7 +81,33 @@ ranked_phone_email as (
     from phone_email_scored
 ),
 
--- 7. Email cleaning AFTER all deduping
+deduped_phone_email as (
+    select *
+    from ranked_phone_email
+    where rn_pe = 1
+),
+
+-- 7. ⭐ NEW: dedupe per contact_id per day per vulcan_id
+vulcan_scored as (
+    select
+        *,
+        case when completed_at is not null then 2 else 0 end
+        + case when vulcan_id is not null then 1 else 0 end
+        as v_score
+    from deduped_phone_email
+),
+
+ranked_vulcan as (
+    select
+        *,
+        row_number() over (
+            partition by contact_id, started_date, vulcan_id
+            order by v_score desc, completed_at desc, started_at desc
+        ) as rn_vulcan
+    from vulcan_scored
+),
+
+-- 8. Email cleaning AFTER all deduping
 cleaned as (
     select
         conversation_id,
@@ -96,8 +122,8 @@ cleaned as (
             when email ilike '%@test.com%' then null
             else email
         end as email
-    from ranked_phone_email
-    where rn_pe = 1
+    from ranked_vulcan
+    where rn_vulcan = 1
 )
 
 select * from cleaned
