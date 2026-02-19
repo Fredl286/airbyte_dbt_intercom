@@ -1,10 +1,14 @@
 {{ config(materialized='table') }}
 
+-- 1. Base table WITH REMOVAL of test/internal emails
 with base as (
     select *
     from {{ ref('intercom_echo_conversations') }}
+    where email not ilike '%payplan.com%'
+      and email not ilike '%@test.com%'
 ),
 
+-- 2. Score for conversation-level dedupe
 scored as (
     select
         *,
@@ -14,6 +18,7 @@ scored as (
     from base
 ),
 
+-- 3. Pick best row per conversation_id
 ranked_conversation as (
     select
         *,
@@ -30,6 +35,7 @@ deduped_conversation as (
     where rn = 1
 ),
 
+-- 4. Backfill vulcan_id from other rows for the same contact/day
 vulcan_backfilled as (
     select
         *,
@@ -42,6 +48,7 @@ vulcan_backfilled as (
     from deduped_conversation
 ),
 
+-- 5. Add daily grouping
 daily_scored as (
     select
         *,
@@ -52,6 +59,7 @@ daily_scored as (
     from vulcan_backfilled
 ),
 
+-- 6. Dedupe per contact_id per day
 ranked_daily as (
     select
         *,
@@ -68,6 +76,7 @@ deduped_daily as (
     where rn_daily = 1
 ),
 
+-- 7. Dedupe per contact_id per day per phone+email
 phone_email_scored as (
     select
         *,
@@ -93,6 +102,7 @@ deduped_phone_email as (
     where rn_pe = 1
 ),
 
+-- 8. Dedupe per contact_id per day per vulcan_id
 vulcan_scored as (
     select
         *,
@@ -112,6 +122,7 @@ ranked_vulcan as (
     from vulcan_scored
 ),
 
+-- 9. Final cleaned output
 cleaned as (
     select
         conversation_id,
@@ -121,11 +132,7 @@ cleaned as (
         tags_applied,
         vulcan_id_filled as vulcan_id,
         phone,
-        case
-            when email ilike '%payplan.com%' then null
-            when email ilike '%@test.com%' then null
-            else email
-        end as email
+        email
     from ranked_vulcan
     where rn_vulcan = 1
 )
