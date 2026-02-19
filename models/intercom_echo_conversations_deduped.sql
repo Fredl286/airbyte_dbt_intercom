@@ -1,11 +1,12 @@
 {{ config(materialized='table') }}
 
--- 1. Base table WITH REMOVAL of test/internal emails
+-- 1. Base table WITH SAFE REMOVAL of test/internal emails
+--    This keeps NULL emails and removes only actual matches.
 with base as (
     select *
     from {{ ref('intercom_echo_conversations') }}
-    where email not ilike '%payplan.com%'
-      and email not ilike '%@test.com%'
+    where coalesce(email, '') not ilike '%payplan.com%'
+      and coalesce(email, '') not ilike '%@test.com%'
 ),
 
 -- 2. Score for conversation-level dedupe
