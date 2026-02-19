@@ -33,18 +33,31 @@ deduped_conversation as (
     where rn = 1
 ),
 
--- 4. Add daily grouping
+-- 4. ⭐ Backfill vulcan_id from other rows for the same contact/day
+vulcan_backfilled as (
+    select
+        *,
+        coalesce(
+            vulcan_id,
+            max(vulcan_id) over (
+                partition by contact_id, date(started_at)
+            )
+        ) as vulcan_id_filled
+    from deduped_conversation
+),
+
+-- 5. Add daily grouping
 daily_scored as (
     select
         *,
         date(started_at) as started_date,
         case when completed_at is not null then 2 else 0 end
-        + case when vulcan_id is not null then 1 else 0 end
+        + case when vulcan_id_filled is not null then 1 else 0 end
         as daily_score
-    from deduped_conversation
+    from vulcan_backfilled
 ),
 
--- 5. Dedupe per contact_id per day
+-- 6. Dedupe per contact_id per day
 ranked_daily as (
     select
         *,
@@ -61,12 +74,12 @@ deduped_daily as (
     where rn_daily = 1
 ),
 
--- 6. Dedupe per contact_id per day per phone+email
+-- 7. Dedupe per contact_id per day per phone+email
 phone_email_scored as (
     select
         *,
         case when completed_at is not null then 2 else 0 end
-        + case when vulcan_id is not null then 1 else 0 end
+        + case when vulcan_id_filled is not null then 1 else 0 end
         as pe_score
     from deduped_daily
 ),
@@ -87,12 +100,12 @@ deduped_phone_email as (
     where rn_pe = 1
 ),
 
--- 7. ⭐ NEW: dedupe per contact_id per day per vulcan_id
+-- 8. ⭐ Dedupe per contact_id per day per vulcan_id
 vulcan_scored as (
     select
         *,
         case when completed_at is not null then 2 else 0 end
-        + case when vulcan_id is not null then 1 else 0 end
+        + case when vulcan_id_filled is not null then 1 else 0 end
         as v_score
     from deduped_phone_email
 ),
@@ -101,13 +114,13 @@ ranked_vulcan as (
     select
         *,
         row_number() over (
-            partition by contact_id, started_date, vulcan_id
+            partition by contact_id, started_date, vulcan_id_filled
             order by v_score desc, completed_at desc, started_at desc
         ) as rn_vulcan
     from vulcan_scored
 ),
 
--- 8. Email cleaning AFTER all deduping
+-- 9. Email cleaning AFTER all deduping
 cleaned as (
     select
         conversation_id,
@@ -115,7 +128,7 @@ cleaned as (
         started_at,
         completed_at,
         tags_applied,
-        vulcan_id,
+        vulcan_id_filled as vulcan_id,
         phone,
         case
             when email ilike '%payplan.com%' then null
@@ -126,4 +139,4 @@ cleaned as (
     where rn_vulcan = 1
 )
 
-select * from cleaned
+select * from cleaned;
