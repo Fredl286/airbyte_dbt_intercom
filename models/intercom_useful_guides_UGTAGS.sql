@@ -33,10 +33,12 @@ contacts as (
             c.phone,
             c.email,
 
+            -- CORRECT ATTRIBUTE NAMES + 2 DECIMAL FORMATTING
             ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
-            ROUND(TO_NUMBER(c.custom_attributes:"Vulcan_surplus"::string), 2) as vulcan_surplus,
-            ROUND(TO_NUMBER(c.custom_attributes:"Total_debt unsecured debt vsapi"::string), 2) as total_unsecured_debt_vsapi,
-            ROUND(TO_NUMBER(c.custom_attributes:"Total_debt"::string), 2) as total_debt,
+            ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
+            ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
+            ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
+            ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure,
 
             row_number() over (
                 partition by c.id
@@ -74,7 +76,12 @@ final as (
             ct.surplus,
             ct.vulcan_surplus,
             ct.total_unsecured_debt_vsapi,
-            ct.total_debt,
+            ct.total_household_income,
+            ct.total_household_expenditure,
+
+            -- NEW FLAGS
+            case when ct.surplus >= 35 then 1 else 0 end as surplus_flag,
+            case when ct.total_unsecured_debt_vsapi >= 3000 then 1 else 0 end as debt_flag,
 
             -- completeness score
             (
@@ -82,7 +89,8 @@ final as (
                 (case when ct.surplus is not null then 1 else 0 end) +
                 (case when ct.vulcan_surplus is not null then 1 else 0 end) +
                 (case when ct.total_unsecured_debt_vsapi is not null then 1 else 0 end) +
-                (case when ct.total_debt is not null then 1 else 0 end)
+                (case when ct.total_household_income is not null then 1 else 0 end) +
+                (case when ct.total_household_expenditure is not null then 1 else 0 end)
             ) as completeness_score,
 
             row_number() over (
@@ -93,7 +101,8 @@ final as (
                         (case when ct.surplus is not null then 1 else 0 end) +
                         (case when ct.vulcan_surplus is not null then 1 else 0 end) +
                         (case when ct.total_unsecured_debt_vsapi is not null then 1 else 0 end) +
-                        (case when ct.total_debt is not null then 1 else 0 end)
+                        (case when ct.total_household_income is not null then 1 else 0 end) +
+                        (case when ct.total_household_expenditure is not null then 1 else 0 end)
                     ) desc
             ) as rn
 
