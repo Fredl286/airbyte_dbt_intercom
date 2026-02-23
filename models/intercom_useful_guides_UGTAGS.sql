@@ -29,13 +29,10 @@ contacts as (
         nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
         c.phone,
         c.email,
-
-        -- NEW FIELDS YOU REQUESTED
-        c.custom_attributes:"SURPLUS"::string as surplus,
-        c.custom_attributes:"NEW SURPLUS"::string as new_surplus,
-        c.custom_attributes:"CUSTOMER_SUGGESTED_SURPLUS"::string as customer_suggested_surplus,
-        c.custom_attributes:"TOTAL unsecured debt vsapi"::string as total_unsecured_debt_vsapi,
-        c.custom_attributes:"Debt level"::string as debt_level
+        c.custom_attributes:"Surplus"::string as surplus,
+        c.custom_attributes:"Vulcan surplus"::string as vulcan_surplus,
+        c.custom_attributes:"Total debt unsecured debt vsapi"::string as total_unsecured_debt_vsapi,
+        c.custom_attributes:"Total debt"::string as total_debt
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
@@ -61,10 +58,9 @@ select
     ct.phone,
     ct.email,
     ct.surplus,
-    ct.new_surplus,
-    ct.customer_suggested_surplus,
+    ct.vulcan_surplus,
     ct.total_unsecured_debt_vsapi,
-    ct.debt_level
+    ct.total_debt
 
 from pivoted p
 left join contacts ct
