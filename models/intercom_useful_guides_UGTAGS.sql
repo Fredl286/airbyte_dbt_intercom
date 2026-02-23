@@ -11,7 +11,16 @@ tags_exploded as (
         r.contacts:"contacts"[0]:"id"::string as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string = 'Intercom Useful Guide'
+    where t.value:"name"::string in (
+        'Auto UG | Error',
+        'AUTO UG - Not Sent',
+        'Auto UG - DMP/DAS',
+        'auto ug | error | no debt level',
+        'Auto UG | Error 19-02-26',
+        'aug echo',
+        'Auto UG - Short Time To Repay',
+        'Auto UG - Zero Offer'
+    )
 ),
 
 contacts as (
@@ -27,7 +36,9 @@ pivoted as (
     select
         te.conversation_id,
         te.contact_id,
-        max(to_timestamp(te.applied_at_unix)) as useful_guide_at,
+        -- capture the most recent timestamp for each conversation/contact
+        max(to_timestamp(te.applied_at_unix)) as latest_tag_time,
+        -- list all tags applied
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
@@ -36,7 +47,7 @@ pivoted as (
 select
     p.conversation_id,
     p.contact_id,
-    p.useful_guide_at,
+    p.latest_tag_time,
     p.tags_applied,
     ct.vulcan_id,
     ct.phone,
