@@ -4,7 +4,7 @@ with raw as (
 ),
 
 tags_exploded as (
-    select
+    select distinct
         r.id as conversation_id,
         t.value:"name"::string as tag_name,
         t.value:"applied_at"::bigint as applied_at_unix,
@@ -28,18 +28,44 @@ contacts as (
         c.id as contact_id,
         nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
         c.phone,
-        c.email
+        c.email,
+
+        -- NEW FIELDS YOU REQUESTED
+        c.custom_attributes:"SURPLUS"::string as surplus,
+        c.custom_attributes:"NEW SURPLUS"::string as new_surplus,
+        c.custom_attributes:"CUSTOMER_SUGGESTED_SURPLUS"::string as customer_suggested_surplus,
+        c.custom_attributes:"TOTAL unsecured debt vsapi"::string as total_unsecured_debt_vsapi,
+        c.custom_attributes:"Debt level"::string as debt_level
+
     from {{ source('airbyte_intercom','contacts') }} c
+),
+
+pivoted as (
+    select
+        te.conversation_id,
+        te.contact_id,
+        max(to_timestamp(te.applied_at_unix)) as latest_tag_time,
+        listagg(distinct te.tag_name, ', ') as tags_applied
+    from tags_exploded te
+    group by te.conversation_id, te.contact_id
 )
 
 select
-    te.conversation_id,
-    te.contact_id,
-    te.tag_name,
-    to_timestamp(te.applied_at_unix) as tag_applied_at,
+    p.conversation_id,
+    p.contact_id,
+    p.latest_tag_time,
+    p.tags_applied,
+
+    -- CONTACT FIELDS
     ct.vulcan_id,
     ct.phone,
-    ct.email
-from tags_exploded te
+    ct.email,
+    ct.surplus,
+    ct.new_surplus,
+    ct.customer_suggested_surplus,
+    ct.total_unsecured_debt_vsapi,
+    ct.debt_level
+
+from pivoted p
 left join contacts ct
-  on te.contact_id = ct.contact_id
+  on p.contact_id = ct.contact_id;
