@@ -30,9 +30,9 @@ contacts as (
         c.phone,
         c.email,
         c.custom_attributes:"Surplus"::string as surplus,
-        c.custom_attributes:"Vulcan surplus"::string as vulcan_surplus,
-        c.custom_attributes:"Total debt unsecured debt vsapi"::string as total_unsecured_debt_vsapi,
-        c.custom_attributes:"Total debt"::string as total_debt
+        c.custom_attributes:"Vulcan_surplus"::string as vulcan_surplus,
+        c.custom_attributes:"Total_debt unsecured debt vsapi"::string as total_unsecured_debt_vsapi,
+        c.custom_attributes:"Total_debt"::string as total_debt
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
