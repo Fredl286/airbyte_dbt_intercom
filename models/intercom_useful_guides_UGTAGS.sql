@@ -36,9 +36,7 @@ pivoted as (
     select
         te.conversation_id,
         te.contact_id,
-        -- capture the most recent timestamp for each conversation/contact
         max(to_timestamp(te.applied_at_unix)) as latest_tag_time,
-        -- list all tags applied
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
@@ -54,4 +52,4 @@ select
     ct.email
 from pivoted p
 left join contacts ct
-  on p.contact_id = ct.contact_id;
+  on p.contact_id = ct.contact_id
