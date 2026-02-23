@@ -4,7 +4,7 @@ with raw as (
 ),
 
 tags_exploded as (
-    select distinct
+    select
         r.id as conversation_id,
         t.value:"name"::string as tag_name,
         t.value:"applied_at"::bigint as applied_at_unix,
@@ -30,26 +30,16 @@ contacts as (
         c.phone,
         c.email
     from {{ source('airbyte_intercom','contacts') }} c
-),
-
-pivoted as (
-    select
-        te.conversation_id,
-        te.contact_id,
-        max(to_timestamp(te.applied_at_unix)) as latest_tag_time,
-        listagg(distinct te.tag_name, ', ') as tags_applied
-    from tags_exploded te
-    group by te.conversation_id, te.contact_id
 )
 
 select
-    p.conversation_id,
-    p.contact_id,
-    p.latest_tag_time,
-    p.tags_applied,
+    te.conversation_id,
+    te.contact_id,
+    te.tag_name,
+    to_timestamp(te.applied_at_unix) as tag_applied_at,
     ct.vulcan_id,
     ct.phone,
     ct.email
-from pivoted p
+from tags_exploded te
 left join contacts ct
-  on p.contact_id = ct.contact_id
+  on te.contact_id = ct.contact_id;
