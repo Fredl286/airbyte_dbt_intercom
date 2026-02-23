@@ -42,4 +42,4 @@ select
     ct.email
 from tags_exploded te
 left join contacts ct
-  on te.contact_id = ct.contact_id;
+  on te.contact_id = ct.contact_id
