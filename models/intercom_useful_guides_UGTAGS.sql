@@ -29,10 +29,12 @@ contacts as (
         nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
         c.phone,
         c.email,
-        c.custom_attributes:"Surplus"::string as surplus,
-        c.custom_attributes:"Vulcan_surplus"::string as vulcan_surplus,
-        c.custom_attributes:"Total_debt unsecured debt vsapi"::string as total_unsecured_debt_vsapi,
-        c.custom_attributes:"Total_debt"::string as total_debt
+
+        -- FORMAT TO 2 DECIMAL PLACES
+        ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
+        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan_surplus"::string), 2) as vulcan_surplus,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total_debt unsecured debt vsapi"::string), 2) as total_unsecured_debt_vsapi,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total_debt"::string), 2) as total_debt
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
@@ -64,4 +66,4 @@ select
 
 from pivoted p
 left join contacts ct
-  on p.contact_id = ct.contact_id
+  on p.contact_id = ct.contact_id;
