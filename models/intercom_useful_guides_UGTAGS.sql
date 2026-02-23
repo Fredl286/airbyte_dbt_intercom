@@ -32,9 +32,11 @@ contacts as (
 
         -- FORMAT TO 2 DECIMAL PLACES
         ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan_surplus"::string), 2) as vulcan_surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total_debt unsecured debt vsapi"::string), 2) as total_unsecured_debt_vsapi,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total_debt"::string), 2) as total_debt
+        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_unsecured_debt_vsapi,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_unsecured_debt_vsapi,
+        ROUND(TO_NUMBER(c.custom_attributes:"total_debt"::string), 2) as total_debt
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
