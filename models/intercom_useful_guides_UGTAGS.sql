@@ -23,20 +23,31 @@ tags_exploded as (
     )
 ),
 
+-- pick the BEST version of each contact (most complete, latest updated)
 contacts as (
-    select distinct
-        c.id as contact_id,
-        nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
-        c.phone,
-        c.email,
-        ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure,
-        ROUND(TO_NUMBER(c.custom_attributes:"total_debt"::string), 2) as total_debt
+    select *
+    from (
+        select
+            c.id as contact_id,
+            nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
+            c.phone,
+            c.email,
 
-    from {{ source('airbyte_intercom','contacts') }} c
+            -- FORMAT TO 2 DECIMAL PLACES
+            ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
+            ROUND(TO_NUMBER(c.custom_attributes:"Vulcan_surplus"::string), 2) as vulcan_surplus,
+            ROUND(TO_NUMBER(c.custom_attributes:"Total_debt unsecured debt vsapi"::string), 2) as total_unsecured_debt_vsapi,
+            ROUND(TO_NUMBER(c.custom_attributes:"Total_debt"::string), 2) as total_debt,
+
+            -- choose the newest version of each contact
+            row_number() over (
+                partition by c.id
+                order by c.updated_at desc nulls last
+            ) as rn
+
+        from {{ source('airbyte_intercom','contacts') }} c
+    )
+    where rn = 1
 ),
 
 pivoted as (
@@ -62,9 +73,8 @@ select
     ct.surplus,
     ct.vulcan_surplus,
     ct.total_unsecured_debt_vsapi,
-    ct.total_household_income,
-    ct.total_household_expenditure
+    ct.total_debt
 
 from pivoted p
 left join contacts ct
-  on p.contact_id = ct.contact_id
+  on p.contact_id = ct.contact_id;
