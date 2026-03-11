@@ -45,7 +45,13 @@ select
     p.tags_applied,
     ct.vulcan_id,
     ct.phone,
-    ct.email
+    ct.email,
+    ct.surplus,
+    ct.vulcan_surplus,
+    ct.total_unsecured_debt_vsapi,
+    ct.total_household_income,
+    ct.total_household_expenditure,
+
 from pivoted p
 left join contacts ct
   on p.contact_id = ct.contact_id
