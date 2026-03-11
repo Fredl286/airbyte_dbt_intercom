@@ -132,7 +132,13 @@ cleaned as (
         tags_applied,
         vulcan_id_filled as vulcan_id,
         phone,
-        email
+        email,
+        surplus,
+        vulcan_surplus,
+        total_unsecured_debt_vsapi as total_unsecured_debt,
+        total_household_income,
+        total_household_expenditure
+
     from ranked_vulcan
     where rn_vulcan = 1
 )
