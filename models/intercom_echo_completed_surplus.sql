@@ -1,11 +1,13 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    schema='AIRBYTE_SCHEMA_INTERCOM_ANALYTICS'
+) }}
 
--- 1. Base table WITH SAFE REMOVAL of test/internal emails + completed-only filter
+-- 1. Base table WITH SAFE REMOVAL of test/internal emails
 with base as (
     select *
     from {{ ref('intercom_echo_conversations') }}
-    where completed_at is not null
-      and coalesce(email, '') not ilike '%payplan.com%'
+    where coalesce(email, '') not ilike '%payplan.com%'
       and coalesce(email, '') not ilike '%@test.com%'
 ),
 
@@ -135,7 +137,7 @@ cleaned as (
         phone,
         email,
 
-        -- NEW FIELDS ADDED
+        -- NEW FIELDS
         surplus,
         vulcan_surplus,
         total_unsecured_debt_vsapi,
@@ -148,4 +150,4 @@ cleaned as (
     where rn_vulcan = 1
 )
 
-select * from cleaned;
+select * from cleaned
