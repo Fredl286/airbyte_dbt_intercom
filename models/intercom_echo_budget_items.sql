@@ -95,4 +95,4 @@ FROM pivoted p
 LEFT JOIN contacts_base ct
     ON p.contact_id = ct.contact_id
 LEFT JOIN echo_pivot ep
-    ON p.contact_id = ep.contact_id;
+    ON p.contact_id = ep.contact_id
