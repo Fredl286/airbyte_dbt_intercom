@@ -1,22 +1,3 @@
-{# ------------------------------------------------------------- #}
-{# 1. Discover all ECHO-related custom attribute keys            #}
-{# ------------------------------------------------------------- #}
-
-{% set echo_keys_query %}
-    SELECT DISTINCT LOWER(f.key) AS key
-    FROM {{ source('airbyte_intercom','contacts') }} c,
-         LATERAL FLATTEN(input => c.custom_attributes) f
-    WHERE LOWER(f.key) LIKE '%echo%'
-{% endset %}
-
-{% set echo_keys = run_query(echo_keys_query).columns[0].values() %}
-{# echo_keys is now a Python list of strings #}
-
-
-{# ------------------------------------------------------------- #}
-{# 2. Base raw conversations                                     #}
-{# ------------------------------------------------------------- #}
-
 WITH raw AS (
     SELECT *
     FROM {{ source('airbyte_intercom','conversations') }}
@@ -46,11 +27,9 @@ pivoted AS (
     GROUP BY te.conversation_id, te.contact_id
 ),
 
-
-{# ------------------------------------------------------------- #}
-{# 3. Extract ALL custom attributes (including your existing ones) #}
-{# ------------------------------------------------------------- #}
-
+/* -------------------------------------------------------------
+   Contacts base (your existing attributes)
+--------------------------------------------------------------*/
 contacts_base AS (
     SELECT DISTINCT
         c.id AS contact_id,
@@ -58,7 +37,6 @@ contacts_base AS (
         c.phone,
         c.email,
 
-        -- Your existing attributes
         ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) AS surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) AS vulcan_surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) AS total_unsecured_debt_vsapi,
@@ -67,10 +45,9 @@ contacts_base AS (
     FROM {{ source('airbyte_intercom','contacts') }} c
 ),
 
-{# ------------------------------------------------------------- #}
-{# 4. Flatten ALL ECHO attributes dynamically                     #}
-{# ------------------------------------------------------------- #}
-
+/* -------------------------------------------------------------
+   Flatten ALL custom attributes and filter to ECHO keys
+--------------------------------------------------------------*/
 echo_attributes AS (
     SELECT
         c.id AS contact_id,
@@ -81,24 +58,21 @@ echo_attributes AS (
     WHERE LOWER(f.key) LIKE '%echo%'
 ),
 
-{# ------------------------------------------------------------- #}
-{# 5. Pivot ECHO attributes dynamically                           #}
-{# ------------------------------------------------------------- #}
-
+/* -------------------------------------------------------------
+   Pivot dynamically using Snowflake's PIVOT ANY_VALUE
+--------------------------------------------------------------*/
 echo_pivot AS (
-    SELECT
-        contact_id,
-        {% for k in echo_keys %}
-            MAX(CASE WHEN attr_key = '{{ k }}' THEN attr_value END) AS {{ k }}{% if not loop.last %},{% endif %}
-        {% endfor %}
+    SELECT *
     FROM echo_attributes
-    GROUP BY contact_id
+    PIVOT (
+        MAX(attr_value) FOR attr_key IN (
+            SELECT DISTINCT LOWER(f.key)
+            FROM {{ source('airbyte_intercom','contacts') }} c,
+                 LATERAL FLATTEN(input => c.custom_attributes) f
+            WHERE LOWER(f.key) LIKE '%echo%'
+        )
+    )
 )
-
-
-{# ------------------------------------------------------------- #}
-{# 6. Final output: conversations + contacts + dynamic ECHO attrs #}
-{# ------------------------------------------------------------- #}
 
 SELECT
     p.conversation_id,
@@ -107,7 +81,6 @@ SELECT
     p.completed_at,
     p.tags_applied,
 
-    -- Your existing contact fields
     ct.vulcan_id,
     ct.phone,
     ct.email,
@@ -117,7 +90,6 @@ SELECT
     ct.total_household_income,
     ct.total_household_expenditure,
 
-    -- Dynamically added ECHO attributes
     ep.*
 FROM pivoted p
 LEFT JOIN contacts_base ct
