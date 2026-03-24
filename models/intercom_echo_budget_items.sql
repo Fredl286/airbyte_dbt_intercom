@@ -135,4 +135,4 @@ select
 
 from pivoted p
 left join contacts ct
-  on p.contact_id = ct.contact_id;
+  on p.contact_id = ct.contact_id
