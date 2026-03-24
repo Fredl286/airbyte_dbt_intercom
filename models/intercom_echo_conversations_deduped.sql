@@ -3,7 +3,7 @@
 -- 1. Base table WITH SAFE REMOVAL of test/internal emails
 with base as (
     select *
-    from {{ ref('intercom_echo_budget_items') }}
+    from {{ ref('intercom_echo_conversations') }}
     where coalesce(email, '') not ilike '%payplan.com%'
       and coalesce(email, '') not ilike '%@test.com%'
 ),
@@ -122,7 +122,7 @@ ranked_vulcan as (
     from vulcan_scored
 ),
 
--- 9. Final cleaned output WITH ALL CUSTOM ATTRIBUTES
+-- 9. Final cleaned output
 cleaned as (
     select
         conversation_id,
@@ -133,39 +133,11 @@ cleaned as (
         vulcan_id_filled as vulcan_id,
         phone,
         email,
-
-        -- EXISTING FIELDS
         surplus,
         vulcan_surplus,
         total_unsecured_debt_vsapi as total_unsecured_debt,
         total_household_income,
-        total_household_expenditure,
-
-        -- NEW BUDGET FIELDS
-        monthly_buildings_and_content_insurance_cost,
-        monthly_child_maintenance_payment,
-        monthly_childcare_costs,
-        monthly_clothing_cost,
-        monthly_council_tax_amount,
-        monthly_electric_cost,
-        monthly_energy_costs,
-        monthly_fuel_costs,
-        monthly_gas_cost,
-        monthly_groceries_cost,
-        monthly_hobbies_and_leisure_costs,
-        monthly_income,
-        monthly_internet_and_subscription_costs,
-        monthly_life_insurance_cost,
-        monthly_medical_costs,
-        monthly_mortgage_amount,
-        monthly_public_transport_costs,
-        monthly_rent_amount,
-        monthly_tv_licence_cost,
-        monthly_tv_internet_and_subscription_costs,
-        monthly_vehicle_finance_costs,
-        monthly_vehicle_insurance_cost,
-        monthly_vehicle_tax_cost,
-        monthly_water_cost
+        total_household_expenditure
 
     from ranked_vulcan
     where rn_vulcan = 1
