@@ -22,91 +22,110 @@ contacts as (
         c.phone,
         c.email,
 
-        -- EXISTING FIELDS (no rounding)
-        TO_NUMBER(c.custom_attributes:"Surplus"::string) as surplus,
-        TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string) as vulcan_surplus,
-        TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string) as total_unsecured_debt_vsapi,
-        TO_NUMBER(c.custom_attributes:"Total Household Income"::string) as total_household_income,
-        TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string) as total_household_expenditure,
+        -- EXISTING FIELDS
+        ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
+        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure,
 
         -- NEW BUDGET FIELDS (already present)
-        TO_NUMBER(c.custom_attributes:"monthly buildings and content insurance cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"monthly buildings and content insurance cost"::string), 2)
             as monthly_buildings_and_content_insurance_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly Child Maintenance Payment"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Child Maintenance Payment"::string), 2)
             as monthly_child_maintenance_payment,
-        TO_NUMBER(c.custom_attributes:"monthly childcare costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"monthly childcare costs"::string), 2)
             as monthly_childcare_costs,
-        TO_NUMBER(c.custom_attributes:"Monthly Clothing Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Clothing Cost"::string), 2)
             as monthly_clothing_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly Council Tax Amount"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Council Tax Amount"::string), 2)
             as monthly_council_tax_amount,
-        TO_NUMBER(c.custom_attributes:"Monthly Electric Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Electric Cost"::string), 2)
             as monthly_electric_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly Energy Costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Energy Costs"::string), 2)
             as monthly_energy_costs,
-        TO_NUMBER(c.custom_attributes:"monthly fuel costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"monthly fuel costs"::string), 2)
             as monthly_fuel_costs,
-        TO_NUMBER(c.custom_attributes:"Monthly Gas Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Gas Cost"::string), 2)
             as monthly_gas_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly Groceries Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Groceries Cost"::string), 2)
             as monthly_groceries_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly Hobbies and Leisure Costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Hobbies and Leisure Costs"::string), 2)
             as monthly_hobbies_and_leisure_costs,
-        TO_NUMBER(c.custom_attributes:"Monthly Income"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Income"::string), 2)
             as monthly_income,
-        TO_NUMBER(c.custom_attributes:"Monthly Internet and Subscription Costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Internet and Subscription Costs"::string), 2)
             as monthly_internet_and_subscription_costs,
-        TO_NUMBER(c.custom_attributes:"Monthly Life Insurance Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Life Insurance Cost"::string), 2)
             as monthly_life_insurance_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly Medical Costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Medical Costs"::string), 2)
             as monthly_medical_costs,
-        TO_NUMBER(c.custom_attributes:"Monthly Mortgage Amount"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Mortgage Amount"::string), 2)
             as monthly_mortgage_amount,
-        TO_NUMBER(c.custom_attributes:"Monthly Public Transport Costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Public Transport Costs"::string), 2)
             as monthly_public_transport_costs,
-        TO_NUMBER(c.custom_attributes:"Monthly Rent Amount"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Rent Amount"::string), 2)
             as monthly_rent_amount,
-        TO_NUMBER(c.custom_attributes:"Monthly TV Licence Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly TV Licence Cost"::string), 2)
             as monthly_tv_licence_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly TV, Internet and Subscription costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly TV, Internet and Subscription costs"::string), 2)
             as monthly_tv_internet_and_subscription_costs,
-        TO_NUMBER(c.custom_attributes:"Monthly Vehicle Finance Costs"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Vehicle Finance Costs"::string), 2)
             as monthly_vehicle_finance_costs,
-        TO_NUMBER(c.custom_attributes:"Monthly Vehicle Insurance Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Vehicle Insurance Cost"::string), 2)
             as monthly_vehicle_insurance_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly Vehicle Tax Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Vehicle Tax Cost"::string), 2)
             as monthly_vehicle_tax_cost,
-        TO_NUMBER(c.custom_attributes:"Monthly Water Cost"::string)
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Water Cost"::string), 2)
             as monthly_water_cost,
-
-        TO_NUMBER(c.custom_attributes:"Buildings and Contents"::string) as buildings_and_contents,
-        TO_NUMBER(c.custom_attributes:"Bundle Costs"::string) as bundle_costs,
-        TO_NUMBER(c.custom_attributes:"Car Maintenance"::string) as car_maintenance,
-        TO_NUMBER(c.custom_attributes:"car maintenance cost"::string) as car_maintenance_cost,
-        TO_NUMBER(c.custom_attributes:"Child Maintenance"::string) as child_maintenance,
-        TO_NUMBER(c.custom_attributes:"Clothing and Footwear"::string) as clothing_and_footwear,
-        TO_NUMBER(c.custom_attributes:"Council Tax"::string) as council_tax,
-        TO_NUMBER(c.custom_attributes:"Electric"::string) as electric,
-        TO_NUMBER(c.custom_attributes:"Fuel"::string) as fuel,
-        TO_NUMBER(c.custom_attributes:"Gas"::string) as gas,
-        TO_NUMBER(c.custom_attributes:"Gas and Electric"::string) as gas_and_electric,
-        TO_NUMBER(c.custom_attributes:"Groceries"::string) as groceries,
-        TO_NUMBER(c.custom_attributes:"Hair Costs"::string) as hair_costs,
-        TO_NUMBER(c.custom_attributes:"Life Insurance"::string) as life_insurance,
-        TO_NUMBER(c.custom_attributes:"Medical Prescriptions"::string) as medical_prescriptions,
-        TO_NUMBER(c.custom_attributes:"Mortgage"::string) as mortgage,
-        TO_NUMBER(c.custom_attributes:"Phone Costs"::string) as phone_costs,
-        TO_NUMBER(c.custom_attributes:"Rent"::string) as rent,
-        TO_NUMBER(c.custom_attributes:"TV Licence"::string) as tv_licence,
-        c.custom_attributes:"Type of Benefit"::string as type_of_benefit,
-        TO_NUMBER(c.custom_attributes:"Vehicle Finance"::string) as vehicle_finance,
-        TO_NUMBER(c.custom_attributes:"Vehicle Insurance"::string) as vehicle_insurance,
-        TO_NUMBER(c.custom_attributes:"Vehicle Tax"::string) as vehicle_tax,
-        TO_NUMBER(c.custom_attributes:"Water"::string) as water,
-        TO_NUMBER(c.custom_attributes:"Childcare Costs"::string) as childcare_costs,
-        TO_NUMBER(c.custom_attributes:"Hobbies and Leisure"::string) as hobbies_and_leisure,
-        TO_NUMBER(c.custom_attributes:"Public Transport"::string) as public_transport,
-        TO_NUMBER(c.custom_attributes:"TV, Internet and Subscriptions"::string) as tv_internet_and_subscriptions
+        ROUND(TO_NUMBER(c.custom_attributes:"Buildings and Contents"::string), 2)
+            as buildings_and_contents,
+        ROUND(TO_NUMBER(c.custom_attributes:"Bundle Costs"::string), 2)
+            as bundle_costs,
+        ROUND(TO_NUMBER(c.custom_attributes:"Car Maintenance"::string), 2)
+            as car_maintenance,
+        ROUND(TO_NUMBER(c.custom_attributes:"car maintenance cost"::string), 2)
+            as car_maintenance_cost,
+        ROUND(TO_NUMBER(c.custom_attributes:"Child Maintenance"::string), 2)
+            as child_maintenance,
+        ROUND(TO_NUMBER(c.custom_attributes:"Clothing and Footwear"::string), 2)
+            as clothing_and_footwear,
+        ROUND(TO_NUMBER(c.custom_attributes:"Council Tax"::string), 2)
+            as council_tax,
+        ROUND(TO_NUMBER(c.custom_attributes:"Electric"::string), 2)
+            as electric,
+        ROUND(TO_NUMBER(c.custom_attributes:"Fuel"::string), 2)
+            as fuel,
+        ROUND(TO_NUMBER(c.custom_attributes:"Gas"::string), 2)
+            as gas,
+        ROUND(TO_NUMBER(c.custom_attributes:"Gas and Electric"::string), 2)
+            as gas_and_electric,
+        ROUND(TO_NUMBER(c.custom_attributes:"Groceries"::string), 2)
+            as groceries,
+        ROUND(TO_NUMBER(c.custom_attributes:"Hair Costs"::string), 2)
+            as hair_costs,
+        ROUND(TO_NUMBER(c.custom_attributes:"Life Insurance"::string), 2)
+            as life_insurance,
+        ROUND(TO_NUMBER(c.custom_attributes:"Medical Prescriptions"::string), 2)
+            as medical_prescriptions,
+        ROUND(TO_NUMBER(c.custom_attributes:"Mortgage"::string), 2)
+            as mortgage,
+        ROUND(TO_NUMBER(c.custom_attributes:"Phone Costs"::string), 2)
+            as phone_costs,
+        ROUND(TO_NUMBER(c.custom_attributes:"Rent"::string), 2)
+            as rent,
+        ROUND(TO_NUMBER(c.custom_attributes:"TV Licence"::string), 2)
+            as tv_licence,
+        c.custom_attributes:"Type of Benefit"::string
+            as type_of_benefit,
+        ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Finance"::string), 2)
+            as vehicle_finance,
+        ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Insurance"::string), 2)
+            as vehicle_insurance,
+        ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Tax"::string), 2)
+            as vehicle_tax,
+        ROUND(TO_NUMBER(c.custom_attributes:"Water"::string), 2)
+            as water
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
@@ -130,8 +149,64 @@ select
     p.started_at,
     p.completed_at,
     p.tags_applied,
+    ct.vulcan_id,
+    ct.phone,
+    ct.email,
+    ct.surplus,
+    ct.vulcan_surplus,
+    ct.total_unsecured_debt_vsapi,
+    ct.total_household_income,
+    ct.total_household_expenditure,
 
-    ct.*
+    -- NEW BUDGET FIELDS (existing)
+    ct.monthly_buildings_and_content_insurance_cost,
+    ct.monthly_child_maintenance_payment,
+    ct.monthly_childcare_costs,
+    ct.monthly_clothing_cost,
+    ct.monthly_council_tax_amount,
+    ct.monthly_electric_cost,
+    ct.monthly_energy_costs,
+    ct.monthly_fuel_costs,
+    ct.monthly_gas_cost,
+    ct.monthly_groceries_cost,
+    ct.monthly_hobbies_and_leisure_costs,
+    ct.monthly_income,
+    ct.monthly_internet_and_subscription_costs,
+    ct.monthly_life_insurance_cost,
+    ct.monthly_medical_costs,
+    ct.monthly_mortgage_amount,
+    ct.monthly_public_transport_costs,
+    ct.monthly_rent_amount,
+    ct.monthly_tv_licence_cost,
+    ct.monthly_tv_internet_and_subscription_costs,
+    ct.monthly_vehicle_finance_costs,
+    ct.monthly_vehicle_insurance_cost,
+    ct.monthly_vehicle_tax_cost,
+    ct.monthly_water_cost,
+    ct.buildings_and_contents,
+    ct.bundle_costs,
+    ct.car_maintenance,
+    ct.car_maintenance_cost,
+    ct.child_maintenance,
+    ct.clothing_and_footwear,
+    ct.council_tax,
+    ct.electric,
+    ct.fuel,
+    ct.gas,
+    ct.gas_and_electric,
+    ct.groceries,
+    ct.hair_costs,
+    ct.life_insurance,
+    ct.medical_prescriptions,
+    ct.mortgage,
+    ct.phone_costs,
+    ct.rent,
+    ct.tv_licence,
+    ct.type_of_benefit,
+    ct.vehicle_finance,
+    ct.vehicle_insurance,
+    ct.vehicle_tax,
+    ct.water
 
 from pivoted p
 left join contacts ct
