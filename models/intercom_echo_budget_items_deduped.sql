@@ -1,6 +1,5 @@
 {{ config(materialized='table') }}
 
--- 1. Base table WITH SAFE REMOVAL of test/internal emails
 with base as (
     select *
     from {{ ref('intercom_echo_budget_items') }}
@@ -8,7 +7,6 @@ with base as (
       and coalesce(email, '') not ilike '%@test.com%'
 ),
 
--- 2. Score for conversation-level dedupe
 scored as (
     select
         *,
@@ -18,7 +16,6 @@ scored as (
     from base
 ),
 
--- 3. Pick best row per conversation_id
 ranked_conversation as (
     select
         *,
@@ -35,7 +32,6 @@ deduped_conversation as (
     where rn = 1
 ),
 
--- 4. Backfill vulcan_id from other rows for the same contact/day
 vulcan_backfilled as (
     select
         *,
@@ -48,7 +44,6 @@ vulcan_backfilled as (
     from deduped_conversation
 ),
 
--- 5. Add daily grouping (same-day dedupe restored)
 daily_scored as (
     select
         *,
@@ -59,7 +54,6 @@ daily_scored as (
     from vulcan_backfilled
 ),
 
--- 6. Dedupe per contact_id per day
 ranked_daily as (
     select
         *,
@@ -76,7 +70,6 @@ deduped_daily as (
     where rn_daily = 1
 ),
 
--- 7. Dedupe per contact_id per day per phone+email
 phone_email_scored as (
     select
         *,
@@ -102,7 +95,6 @@ deduped_phone_email as (
     where rn_pe = 1
 ),
 
--- 8. Dedupe per contact_id per day per vulcan_id
 vulcan_scored as (
     select
         *,
@@ -122,7 +114,6 @@ ranked_vulcan as (
     from vulcan_scored
 ),
 
--- 9. Final cleaned output WITH ALL CUSTOM ATTRIBUTES
 cleaned as (
     select
         conversation_id,
@@ -141,7 +132,7 @@ cleaned as (
         total_household_income,
         total_household_expenditure,
 
-        -- NEW BUDGET FIELDS (already present)
+        -- NEW BUDGET FIELDS (from first model)
         monthly_buildings_and_content_insurance_cost,
         monthly_child_maintenance_payment,
         monthly_childcare_costs,
@@ -163,9 +154,11 @@ cleaned as (
         monthly_tv_licence_cost,
         monthly_tv_internet_and_subscription_costs,
         monthly_vehicle_finance_costs,
-        monthly_vehicle_insurance_costs,
+        monthly_vehicle_insurance_cost,
         monthly_vehicle_tax_cost,
         monthly_water_cost,
+
+        -- NEWLY ADDED FIELDS (aligned with first model)
         buildings_and_contents,
         bundle_costs,
         car_maintenance,
