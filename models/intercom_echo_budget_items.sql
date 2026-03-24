@@ -77,7 +77,7 @@ contacts as (
         TO_NUMBER(c.custom_attributes:"Childcare Costs"::string) as childcare_costs,
         TO_NUMBER(c.custom_attributes:"Hobbies and Leisure"::string) as hobbies_and_leisure,
         TO_NUMBER(c.custom_attributes:"Public Transport"::string) as public_transport,
-        TO_NUMBER(c.custom_attributes:"TV Internet and Subscriptions"::string) as tv_internet_and_subscriptions
+
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
