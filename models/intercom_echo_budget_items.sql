@@ -1,98 +1,68 @@
-WITH raw AS (
-    SELECT *
-    FROM {{ source('airbyte_intercom','conversations') }}
+with raw as (
+    select *
+    from {{ source('airbyte_intercom','conversations') }}
 ),
 
-tags_exploded AS (
-    SELECT DISTINCT
-        r.id AS conversation_id,
-        t.value:"name"::string AS tag_name,
-        t.value:"applied_at"::bigint AS applied_at_unix,
-        r.contacts:"contacts"[0]:"id"::string AS contact_id
-    FROM raw r,
-         LATERAL FLATTEN(input => r.tags:"tags") t
-    WHERE t.value:"name"::string IN ('Started ECHO Main', 'Completed ECHO main')
+tags_exploded as (
+    select distinct
+        r.id as conversation_id,
+        t.value:"name"::string as tag_name,
+        t.value:"applied_at"::bigint as applied_at_unix,
+        r.contacts:"contacts"[0]:"id"::string as contact_id
+    from raw r,
+         lateral flatten(input => r.tags:"tags") t
+    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
 ),
 
-pivoted AS (
-    SELECT
-        te.conversation_id,
-        te.contact_id,
-        MAX(CASE WHEN te.tag_name = 'Started ECHO Main'
-                 THEN TO_TIMESTAMP(te.applied_at_unix) END) AS started_at,
-        MAX(CASE WHEN te.tag_name = 'Completed ECHO main'
-                 THEN TO_TIMESTAMP(te.applied_at_unix) END) AS completed_at,
-        LISTAGG(DISTINCT te.tag_name, ', ') AS tags_applied
-    FROM tags_exploded te
-    GROUP BY te.conversation_id, te.contact_id
-),
-
-/* -------------------------------------------------------------
-   Contacts base (your existing attributes)
---------------------------------------------------------------*/
-contacts_base AS (
-    SELECT DISTINCT
-        c.id AS contact_id,
-        NULLIF(RTRIM(c.custom_attributes:"vulcan_id"::string), '') AS vulcan_id,
+-- EXPAND ALL CUSTOM ATTRIBUTES
+contact_attributes as (
+    select
+        c.id as contact_id,
         c.phone,
         c.email,
-
-        ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) AS surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) AS vulcan_surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) AS total_unsecured_debt_vsapi,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) AS total_household_income,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) AS total_household_expenditure
-    FROM {{ source('airbyte_intercom','contacts') }} c
+        c.custom_attributes,
+        attr.key::string as attribute_name,
+        attr.value::string as attribute_value
+    from {{ source('airbyte_intercom','contacts') }} c,
+         lateral flatten(input => c.custom_attributes) attr
 ),
 
-/* -------------------------------------------------------------
-   Flatten ALL custom attributes and filter to ECHO keys
---------------------------------------------------------------*/
-echo_attributes AS (
-    SELECT
-        c.id AS contact_id,
-        LOWER(f.key) AS attr_key,
-        f.value::string AS attr_value
-    FROM {{ source('airbyte_intercom','contacts') }} c,
-         LATERAL FLATTEN(input => c.custom_attributes) f
-    WHERE LOWER(f.key) LIKE '%echo%'
-),
-
-/* -------------------------------------------------------------
-   Pivot dynamically using Snowflake's PIVOT ANY_VALUE
---------------------------------------------------------------*/
-echo_pivot AS (
-    SELECT *
-    FROM echo_attributes
-    PIVOT (
-        MAX(attr_value) FOR attr_key IN (
-            SELECT DISTINCT LOWER(f.key)
-            FROM {{ source('airbyte_intercom','contacts') }} c,
-                 LATERAL FLATTEN(input => c.custom_attributes) f
-            WHERE LOWER(f.key) LIKE '%echo%'
+-- PIVOT ALL ATTRIBUTES INTO COLUMNS
+pivoted_attributes as (
+    select *
+    from contact_attributes
+    pivot (
+        max(attribute_value) for attribute_name in (
+            -- dynamically generate list of attribute names
+            {{ dbt_utils.get_column_values(
+                table=source('airbyte_intercom','contacts'),
+                column='custom_attributes',
+                flatten_json=True
+            ) }}
         )
     )
+),
+
+pivoted as (
+    select
+        te.conversation_id,
+        te.contact_id,
+        max(case when te.tag_name = 'Started ECHO Main'
+                 then to_timestamp(te.applied_at_unix) end) as started_at,
+        max(case when te.tag_name = 'Completed ECHO main'
+                 then to_timestamp(te.applied_at_unix) end) as completed_at,
+        listagg(distinct te.tag_name, ', ') as tags_applied
+    from tags_exploded te
+    group by te.conversation_id, te.contact_id
 )
 
-SELECT
+select
     p.conversation_id,
     p.contact_id,
     p.started_at,
     p.completed_at,
     p.tags_applied,
-
-    ct.vulcan_id,
-    ct.phone,
-    ct.email,
-    ct.surplus,
-    ct.vulcan_surplus,
-    ct.total_unsecured_debt_vsapi,
-    ct.total_household_income,
-    ct.total_household_expenditure,
-
-    ep.*
-FROM pivoted p
-LEFT JOIN contacts_base ct
-    ON p.contact_id = ct.contact_id
-LEFT JOIN echo_pivot ep
-    ON p.contact_id = ep.contact_id
+    pa.*
+from pivoted p
+left join pivoted_attributes pa
+  on p.contact_id = pa.contact_id
