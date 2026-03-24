@@ -141,7 +141,7 @@ cleaned as (
         total_household_income,
         total_household_expenditure,
 
-        -- NEW BUDGET FIELDS
+        -- NEW BUDGET FIELDS (already present)
         monthly_buildings_and_content_insurance_cost,
         monthly_child_maintenance_payment,
         monthly_childcare_costs,
@@ -163,9 +163,35 @@ cleaned as (
         monthly_tv_licence_cost,
         monthly_tv_internet_and_subscription_costs,
         monthly_vehicle_finance_costs,
-        monthly_vehicle_insurance_cost,
+        monthly_vehicle_insurance_costs,
         monthly_vehicle_tax_cost,
-        monthly_water_cost
+        monthly_water_cost,
+
+        -- 🔥 NEWLY ADDED FIELDS (previously missing)
+        buildings_and_contents,
+        bundle_costs,
+        car_maintenance,
+        car_maintenance_cost,
+        child_maintenance,
+        clothing_and_footwear,
+        council_tax,
+        electric,
+        fuel,
+        gas,
+        gas_and_electric,
+        groceries,
+        hair_costs,
+        life_insurance,
+        medical_prescriptions,
+        mortgage,
+        phone_costs,
+        rent,
+        tv_licence,
+        type_of_benefit,
+        vehicle_finance,
+        vehicle_insurance,
+        vehicle_tax,
+        water
 
     from ranked_vulcan
     where rn_vulcan = 1
