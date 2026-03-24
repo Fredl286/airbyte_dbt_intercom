@@ -166,8 +166,6 @@ cleaned as (
         monthly_vehicle_insurance_costs,
         monthly_vehicle_tax_cost,
         monthly_water_cost,
-
-        -- 🔥 NEWLY ADDED FIELDS (previously missing)
         buildings_and_contents,
         bundle_costs,
         car_maintenance,
