@@ -1,5 +1,6 @@
 {{ config(materialized='table') }}
 
+-- 1. Base table WITH SAFE REMOVAL of test/internal emails
 with base as (
     select *
     from {{ ref('intercom_echo_budget_items') }}
@@ -7,6 +8,7 @@ with base as (
       and coalesce(email, '') not ilike '%@test.com%'
 ),
 
+-- 2. Score for conversation-level dedupe
 scored as (
     select
         *,
@@ -16,6 +18,7 @@ scored as (
     from base
 ),
 
+-- 3. Pick best row per conversation_id
 ranked_conversation as (
     select
         *,
@@ -32,6 +35,7 @@ deduped_conversation as (
     where rn = 1
 ),
 
+-- 4. Backfill vulcan_id from other rows for the same contact/day
 vulcan_backfilled as (
     select
         *,
@@ -44,6 +48,7 @@ vulcan_backfilled as (
     from deduped_conversation
 ),
 
+-- 5. Add daily grouping
 daily_scored as (
     select
         *,
@@ -54,6 +59,7 @@ daily_scored as (
     from vulcan_backfilled
 ),
 
+-- 6. Dedupe per contact_id per day
 ranked_daily as (
     select
         *,
@@ -70,6 +76,7 @@ deduped_daily as (
     where rn_daily = 1
 ),
 
+-- 7. Dedupe per contact_id per day per phone+email
 phone_email_scored as (
     select
         *,
@@ -95,6 +102,7 @@ deduped_phone_email as (
     where rn_pe = 1
 ),
 
+-- 8. Dedupe per contact_id per day per vulcan_id
 vulcan_scored as (
     select
         *,
@@ -114,25 +122,22 @@ ranked_vulcan as (
     from vulcan_scored
 ),
 
+-- 9. Final cleaned output WITH ONLY THE COLUMNS YOU WANT
 cleaned as (
     select
+        -- EXACT ORDER YOU SPECIFIED
         conversation_id,
         contact_id,
-        started_at,
         completed_at,
-        tags_applied,
         vulcan_id_filled as vulcan_id,
         phone,
         email,
-
-        -- EXISTING FIELDS
-        surplus,
-        vulcan_surplus,
         total_unsecured_debt_vsapi as total_unsecured_debt,
         total_household_income,
         total_household_expenditure,
+        surplus,
 
-        -- NEW BUDGET FIELDS (from first model)
+        -- MONTHLY BUDGET FIELDS
         monthly_buildings_and_content_insurance_cost,
         monthly_child_maintenance_payment,
         monthly_childcare_costs,
@@ -144,7 +149,6 @@ cleaned as (
         monthly_gas_cost,
         monthly_groceries_cost,
         monthly_hobbies_and_leisure_costs,
-        monthly_income,
         monthly_internet_and_subscription_costs,
         monthly_life_insurance_cost,
         monthly_medical_costs,
@@ -158,7 +162,7 @@ cleaned as (
         monthly_vehicle_tax_cost,
         monthly_water_cost,
 
-        -- NEWLY ADDED FIELDS (aligned with first model)
+        -- ADDITIONAL CUSTOM ATTRIBUTES
         buildings_and_contents,
         bundle_costs,
         car_maintenance,
@@ -178,7 +182,6 @@ cleaned as (
         phone_costs,
         rent,
         tv_licence,
-        type_of_benefit,
         vehicle_finance,
         vehicle_insurance,
         vehicle_tax,
@@ -186,6 +189,7 @@ cleaned as (
 
     from ranked_vulcan
     where rn_vulcan = 1
+      and completed_at is not null   -- ONLY COMPLETED CASES
 )
 
 select * from cleaned
