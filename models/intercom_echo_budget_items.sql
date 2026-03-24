@@ -14,56 +14,106 @@ tags_exploded as (
     where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
 ),
 
--- Extract all custom attributes into key/value rows
-contact_attributes as (
-    select
+-- ensure one row per contact_id
+contacts as (
+    select distinct
         c.id as contact_id,
+        nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
         c.phone,
         c.email,
-        attr.key::string as attribute_name,
-        attr.value::string as attribute_value
-    from {{ source('airbyte_intercom','contacts') }} c,
-         lateral flatten(input => c.custom_attributes) attr
-),
 
--- Collect all attribute names for pivoting
-attribute_list as (
-    select distinct attribute_name
-    from contact_attributes
-),
+        -- EXISTING FIELDS
+        ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
+        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
+        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure,
 
--- Build a comma-separated list of quoted attribute names
-attribute_list_sql as (
-    select
-        listagg(quote_ident(attribute_name), ', ') as cols
-    from attribute_list
-),
+        -- NEW BUDGET FIELDS (IN YOUR ORDER)
+        ROUND(TO_NUMBER(c.custom_attributes:"monthly buildings and content insurance cost"::string), 2)
+            as monthly_buildings_and_content_insurance_cost,
 
--- Pivot using dynamic SQL
-pivoted_attributes as (
-    select *
-    from table(
-        flatten(
-            input => parse_json(
-                '{
-                    "sql": "select * from contact_attributes pivot (max(attribute_value) for attribute_name in (' ||
-                    (select cols from attribute_list_sql) ||
-                    '))"
-                }'
-            )
-        )
-    )
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Child Maintenance Payment"::string), 2)
+            as monthly_child_maintenance_payment,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"monthly childcare costs"::string), 2)
+            as monthly_childcare_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Clothing Cost"::string), 2)
+            as monthly_clothing_cost,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Council Tax Amount"::string), 2)
+            as monthly_council_tax_amount,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Electric Cost"::string), 2)
+            as monthly_electric_cost,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Energy Costs"::string), 2)
+            as monthly_energy_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"monthly fuel costs"::string), 2)
+            as monthly_fuel_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Gas Cost"::string), 2)
+            as monthly_gas_cost,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Groceries Cost"::string), 2)
+            as monthly_groceries_cost,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Hobbies and Leisure Costs"::string), 2)
+            as monthly_hobbies_and_leisure_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Income"::string), 2)
+            as monthly_income,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Internet and Subscription Costs"::string), 2)
+            as monthly_internet_and_subscription_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Life Insurance Cost"::string), 2)
+            as monthly_life_insurance_cost,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Medical Costs"::string), 2)
+            as monthly_medical_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Mortgage Amount"::string), 2)
+            as monthly_mortgage_amount,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Public Transport Costs"::string), 2)
+            as monthly_public_transport_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Rent Amount"::string), 2)
+            as monthly_rent_amount,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly TV Licence Cost"::string), 2)
+            as monthly_tv_licence_cost,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly TV, Internet and Subscription costs"::string), 2)
+            as monthly_tv_internet_and_subscription_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Vehicle Finance Costs"::string), 2)
+            as monthly_vehicle_finance_costs,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Vehicle Insurance Cost"::string), 2)
+            as monthly_vehicle_insurance_cost,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Vehicle Tax Cost"::string), 2)
+            as monthly_vehicle_tax_cost,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Monthly Water Cost"::string), 2)
+            as monthly_water_cost
+
+    from {{ source('airbyte_intercom','contacts') }} c
 ),
 
 pivoted as (
     select
         te.conversation_id,
         te.contact_id,
-        max(case when te.tag_name = ''Started ECHO Main''
+        max(case when te.tag_name = 'Started ECHO Main'
                  then to_timestamp(te.applied_at_unix) end) as started_at,
-        max(case when te.tag_name = ''Completed ECHO main''
+        max(case when te.tag_name = 'Completed ECHO main'
                  then to_timestamp(te.applied_at_unix) end) as completed_at,
-        listagg(distinct te.tag_name, '', '') as tags_applied
+        listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
 )
@@ -74,7 +124,41 @@ select
     p.started_at,
     p.completed_at,
     p.tags_applied,
-    pa.*
+    ct.vulcan_id,
+    ct.phone,
+    ct.email,
+    ct.surplus,
+    ct.vulcan_surplus,
+    ct.total_unsecured_debt_vsapi,
+    ct.total_household_income,
+    ct.total_household_expenditure,
+
+    -- NEW BUDGET FIELDS (same order)
+    ct.monthly_buildings_and_content_insurance_cost,
+    ct.monthly_child_maintenance_payment,
+    ct.monthly_childcare_costs,
+    ct.monthly_clothing_cost,
+    ct.monthly_council_tax_amount,
+    ct.monthly_electric_cost,
+    ct.monthly_energy_costs,
+    ct.monthly_fuel_costs,
+    ct.monthly_gas_cost,
+    ct.monthly_groceries_cost,
+    ct.monthly_hobbies_and_leisure_costs,
+    ct.monthly_income,
+    ct.monthly_internet_and_subscription_costs,
+    ct.monthly_life_insurance_cost,
+    ct.monthly_medical_costs,
+    ct.monthly_mortgage_amount,
+    ct.monthly_public_transport_costs,
+    ct.monthly_rent_amount,
+    ct.monthly_tv_licence_cost,
+    ct.monthly_tv_internet_and_subscription_costs,
+    ct.monthly_vehicle_finance_costs,
+    ct.monthly_vehicle_insurance_cost,
+    ct.monthly_vehicle_tax_cost,
+    ct.monthly_water_cost
+
 from pivoted p
-left join pivoted_attributes pa
-  on p.contact_id = pa.contact_id
+left join contacts ct
+  on p.contact_id = ct.contact_id;
