@@ -78,8 +78,6 @@ contacts as (
             as monthly_vehicle_tax_cost,
         ROUND(TO_NUMBER(c.custom_attributes:"Monthly Water Cost"::string), 2)
             as monthly_water_cost,
-
-        -- EXISTING NON-MONTHLY FIELDS
         ROUND(TO_NUMBER(c.custom_attributes:"Buildings and Contents"::string), 2)
             as buildings_and_contents,
         ROUND(TO_NUMBER(c.custom_attributes:"Bundle Costs"::string), 2)
@@ -127,15 +125,7 @@ contacts as (
         ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Tax"::string), 2)
             as vehicle_tax,
         ROUND(TO_NUMBER(c.custom_attributes:"Water"::string), 2)
-            as water,
-
-        -- ⭐ NEW FIELDS YOU REQUESTED ⭐
-        ROUND(TO_NUMBER(c.custom_attributes:"Childcare Costs"::string), 2)
-            as childcare_costs,
-        ROUND(TO_NUMBER(c.custom_attributes:"Hobbies and Leisure"::string), 2)
-            as hobbies_and_leisure,
-        ROUND(TO_NUMBER(c.custom_attributes:"Public Transport"::string), 2)
-            as public_transport
+            as water
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
@@ -168,7 +158,7 @@ select
     ct.total_household_income,
     ct.total_household_expenditure,
 
-    -- MONTHLY FIELDS
+    -- NEW BUDGET FIELDS (existing)
     ct.monthly_buildings_and_content_insurance_cost,
     ct.monthly_child_maintenance_payment,
     ct.monthly_childcare_costs,
@@ -193,8 +183,6 @@ select
     ct.monthly_vehicle_insurance_cost,
     ct.monthly_vehicle_tax_cost,
     ct.monthly_water_cost,
-
-    -- NON-MONTHLY FIELDS
     ct.buildings_and_contents,
     ct.bundle_costs,
     ct.car_maintenance,
@@ -218,11 +206,8 @@ select
     ct.vehicle_finance,
     ct.vehicle_insurance,
     ct.vehicle_tax,
-    ct.water,
-    ct.childcare_costs,
-    ct.hobbies_and_leisure,
-    ct.public_transport
+    ct.water
 
 from pivoted p
 left join contacts ct
-  on p.contact_id = ct.contact_id;
+  on p.contact_id = ct.contact_id"
