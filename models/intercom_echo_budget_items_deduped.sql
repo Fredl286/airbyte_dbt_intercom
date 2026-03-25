@@ -128,8 +128,8 @@ cleaned as (
     select
         conversation_id,
         contact_id,
-        started_at,
         completed_at,
+        auto_ug_at, 
         tags_applied,
         vulcan_id_filled as vulcan_id,
         phone,
