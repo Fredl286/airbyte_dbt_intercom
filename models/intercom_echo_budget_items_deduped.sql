@@ -6,6 +6,7 @@ with base as (
     from {{ ref('intercom_echo_budget_items') }}
     where coalesce(email, '') not ilike '%payplan.com%'
       and coalesce(email, '') not ilike '%@test.com%'
+      and completed_at is not null
 ),
 
 -- 2. Score for conversation-level dedupe
