@@ -3,7 +3,7 @@
 -- 1. Base table WITH SAFE REMOVAL of test/internal emails
 with base as (
     select *
-    from {{ ref('intercom_echo_budget_items') }}
+    from {{ ref('intercom_echo_conversations') }}
     where coalesce(email, '') not ilike '%payplan.com%'
       and coalesce(email, '') not ilike '%@test.com%'
 ),
@@ -122,27 +122,20 @@ ranked_vulcan as (
     from vulcan_scored
 ),
 
--- 9. Final cleaned output WITH ALL CUSTOM FIELDS
+-- 9. Final cleaned output
 cleaned as (
     select
-        -- CORE METADATA
         conversation_id,
         contact_id,
-        started_at,
         completed_at,
         tags_applied,
         vulcan_id_filled as vulcan_id,
         phone,
         email,
-
-        -- FINANCIAL CORE
-        surplus,
-        vulcan_surplus,
         total_unsecured_debt_vsapi as total_unsecured_debt,
         total_household_income,
         total_household_expenditure,
-
-        -- MONTHLY BUDGET FIELDS
+        surplus,
         monthly_buildings_and_content_insurance_cost,
         monthly_child_maintenance_payment,
         monthly_childcare_costs,
@@ -154,7 +147,6 @@ cleaned as (
         monthly_gas_cost,
         monthly_groceries_cost,
         monthly_hobbies_and_leisure_costs,
-        monthly_income,
         monthly_internet_and_subscription_costs,
         monthly_life_insurance_cost,
         monthly_medical_costs,
@@ -167,8 +159,6 @@ cleaned as (
         monthly_vehicle_insurance_cost,
         monthly_vehicle_tax_cost,
         monthly_water_cost,
-
-        -- EXISTING CUSTOM ATTRIBUTES
         buildings_and_contents,
         bundle_costs,
         car_maintenance,
@@ -188,25 +178,18 @@ cleaned as (
         phone_costs,
         rent,
         tv_licence,
-        type_of_benefit,
         vehicle_finance,
         vehicle_insurance,
         vehicle_tax,
         water,
+        childcare_costs,
+        hobbies_and_leisure,
+        public_transport
 
-        -- NON‑MONTHLY FIELDS
-        tv_internet_and_subscriptions,
-        fuel_non_monthly,
-        vehicle_insurance_non_monthly,
-        vehicle_tax_non_monthly,
-        car_maintenance_non_monthly,
-        public_transport_non_monthly,
-        hobbies_and_leisure_non_monthly,
-        childcare_costs_non_monthly
+  
 
     from ranked_vulcan
     where rn_vulcan = 1
-      and completed_at is not null
 )
 
-select * from cleaned
+select * from cleaned}}
