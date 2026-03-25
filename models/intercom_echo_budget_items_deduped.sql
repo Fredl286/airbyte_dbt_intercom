@@ -136,7 +136,8 @@ cleaned as (
         surplus,
         total_unsecured_debt_vsapi as total_unsecured_debt,
         total_household_income,
-        total_household_expenditure
+        total_household_expenditure,
+        monthly_buildings_and_content_insurance_cost
 
     from ranked_vulcan
     where rn_vulcan = 1
