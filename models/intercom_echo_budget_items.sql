@@ -11,10 +11,20 @@ tags_exploded as (
         r.contacts:"contacts"[0]:"id"::string as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
+    where t.value:"name"::string IN (
+        'Auto UG | Error',
+        'AUTO UG - Not Sent',
+        'Auto UG - DMP/DAS',
+        'auto ug | error | no debt level',
+        'Auto UG | Error 19-02-26',
+        'aug echo',
+        'Auto UG - Short Time To Repay',
+        'Auto UG - Zero Offer',
+        'Started ECHO Main',
+        'Completed ECHO main'
+    )
 ),
 
--- ensure one row per contact_id
 contacts as (
     select distinct
         c.id as contact_id,
@@ -52,6 +62,7 @@ contacts as (
         ROUND(TO_NUMBER(c.custom_attributes:"Monthly Vehicle Insurance Cost"::string), 2) as monthly_vehicle_insurance_cost,
         ROUND(TO_NUMBER(c.custom_attributes:"Monthly Vehicle Tax Cost"::string), 2) as monthly_vehicle_tax_cost,
         ROUND(TO_NUMBER(c.custom_attributes:"Monthly Water Cost"::string), 2) as monthly_water_cost,
+
         ROUND(TO_NUMBER(c.custom_attributes:"Buildings and Contents"::string), 2) as buildings_and_contents,
         ROUND(TO_NUMBER(c.custom_attributes:"Bundle Costs"::string), 2) as bundle_costs,
         ROUND(TO_NUMBER(c.custom_attributes:"Car Maintenance"::string), 2) as car_maintenance,
@@ -86,11 +97,31 @@ pivoted as (
     select
         te.conversation_id,
         te.contact_id,
+
+        -- Started / Completed ECHO
         max(case when te.tag_name = 'Started ECHO Main'
                  then to_timestamp(te.applied_at_unix) end) as started_at,
+
         max(case when te.tag_name = 'Completed ECHO main'
                  then to_timestamp(te.applied_at_unix) end) as completed_at,
+
+        -- Auto UG timestamp (most recent of any Auto UG tag)
+        max(case when te.tag_name in (
+                'Auto UG | Error',
+                'AUTO UG - Not Sent',
+                'Auto UG - DMP/DAS',
+                'auto ug | error | no debt level',
+                'Auto UG | Error 19-02-26',
+                'aug echo',
+                'Auto UG - Short Time To Repay',
+                'Auto UG - Zero Offer'
+            )
+            then to_timestamp(te.applied_at_unix)
+        end) as auto_ug_at,
+
+        -- All tags applied
         listagg(distinct te.tag_name, ', ') as tags_applied
+
     from tags_exploded te
     group by te.conversation_id, te.contact_id
 )
@@ -100,7 +131,9 @@ select
     p.contact_id,
     p.started_at,
     p.completed_at,
+    p.auto_ug_at,
     p.tags_applied,
+
     ct.vulcan_id,
     ct.phone,
     ct.email,
@@ -161,4 +194,4 @@ select
 
 from pivoted p
 left join contacts ct
-  on p.contact_id = ct.contact_id
+  on p.contact_id = ct.contact_id;
