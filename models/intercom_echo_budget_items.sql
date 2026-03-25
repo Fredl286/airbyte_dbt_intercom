@@ -77,7 +77,7 @@ contacts as (
         ROUND(TO_NUMBER(c.custom_attributes:"Monthly Water Cost"::string), 2)
             as monthly_water_cost,
 
-        -- NON-MONTHLY FIELDS
+        -- EXISTING NON-MONTHLY FIELDS
         ROUND(TO_NUMBER(c.custom_attributes:"TV, Internet and Subscriptions"::string), 2)
             as tv_internet_and_subscriptions,
         ROUND(TO_NUMBER(c.custom_attributes:"Fuel"::string), 2)
@@ -113,6 +113,7 @@ pivoted as (
 
 select
     p.conversation_id,
+    p.contact_id,
     p.started_at,
     p.completed_at,
     p.tags_applied,
