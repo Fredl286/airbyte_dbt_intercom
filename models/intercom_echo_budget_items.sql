@@ -34,6 +34,7 @@ contacts as (
 
         -- EXISTING FIELDS
         ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
+        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan surplus"::string), 2) as vulcan_surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure,
@@ -138,6 +139,7 @@ select
     ct.phone,
     ct.email,
     ct.surplus,
+    ct.vulcan_surplus,
     ct.total_unsecured_debt_vsapi,
     ct.total_household_income,
     ct.total_household_expenditure,
