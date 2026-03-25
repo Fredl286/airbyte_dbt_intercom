@@ -127,6 +127,32 @@ contacts as (
         ROUND(TO_NUMBER(c.custom_attributes:"Water"::string), 2)
             as water
 
+                -- NEWLY ADDED (previously missing)
+        ROUND(TO_NUMBER(c.custom_attributes:"TV, Internet and Subscriptions"::string), 2)
+            as tv_internet_and_subscriptions,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Fuel"::string), 2)
+            as fuel_non_monthly,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Insurance"::string), 2)
+            as vehicle_insurance_non_monthly,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Tax"::string), 2)
+            as vehicle_tax_non_monthly,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Car Maintenance"::string), 2)
+            as car_maintenance_non_monthly,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Public Transport"::string), 2)
+            as public_transport_non_monthly,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Hobbies and Leisure"::string), 2)
+            as hobbies_and_leisure_non_monthly,
+
+        ROUND(TO_NUMBER(c.custom_attributes:"Childcare Costs"::string), 2)
+            as childcare_costs_non_monthly
+
+
     from {{ source('airbyte_intercom','contacts') }} c
 ),
 
@@ -207,6 +233,14 @@ select
     ct.vehicle_insurance,
     ct.vehicle_tax,
     ct.water
+    ct.tv_internet_and_subscriptions,
+    ct.fuel_non_monthly,
+    ct.vehicle_insurance_non_monthly,
+    ct.vehicle_tax_non_monthly,
+    ct.car_maintenance_non_monthly,
+    ct.public_transport_non_monthly,
+    ct.hobbies_and_leisure_non_monthly,
+    ct.childcare_costs_non_monthly
 
 from pivoted p
 left join contacts ct
