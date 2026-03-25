@@ -138,6 +138,7 @@ cleaned as (
         total_household_income,
         total_household_expenditure,
         surplus,
+        vulcan_surplus,
         monthly_buildings_and_content_insurance_cost,
         monthly_child_maintenance_payment,
         monthly_childcare_costs,
