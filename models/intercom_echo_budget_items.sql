@@ -14,7 +14,6 @@ tags_exploded as (
     where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
 ),
 
--- ensure one row per contact_id
 contacts as (
     select distinct
         c.id as contact_id,
@@ -22,14 +21,13 @@ contacts as (
         c.phone,
         c.email,
 
-        -- EXISTING FIELDS
         ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure,
 
-        -- NEW BUDGET FIELDS (already present)
+        -- NEW BUDGET FIELDS
         ROUND(TO_NUMBER(c.custom_attributes:"monthly buildings and content insurance cost"::string), 2)
             as monthly_buildings_and_content_insurance_cost,
         ROUND(TO_NUMBER(c.custom_attributes:"Monthly Child Maintenance Payment"::string), 2)
@@ -78,80 +76,24 @@ contacts as (
             as monthly_vehicle_tax_cost,
         ROUND(TO_NUMBER(c.custom_attributes:"Monthly Water Cost"::string), 2)
             as monthly_water_cost,
-        ROUND(TO_NUMBER(c.custom_attributes:"Buildings and Contents"::string), 2)
-            as buildings_and_contents,
-        ROUND(TO_NUMBER(c.custom_attributes:"Bundle Costs"::string), 2)
-            as bundle_costs,
-        ROUND(TO_NUMBER(c.custom_attributes:"Car Maintenance"::string), 2)
-            as car_maintenance,
-        ROUND(TO_NUMBER(c.custom_attributes:"car maintenance cost"::string), 2)
-            as car_maintenance_cost,
-        ROUND(TO_NUMBER(c.custom_attributes:"Child Maintenance"::string), 2)
-            as child_maintenance,
-        ROUND(TO_NUMBER(c.custom_attributes:"Clothing and Footwear"::string), 2)
-            as clothing_and_footwear,
-        ROUND(TO_NUMBER(c.custom_attributes:"Council Tax"::string), 2)
-            as council_tax,
-        ROUND(TO_NUMBER(c.custom_attributes:"Electric"::string), 2)
-            as electric,
-        ROUND(TO_NUMBER(c.custom_attributes:"Fuel"::string), 2)
-            as fuel,
-        ROUND(TO_NUMBER(c.custom_attributes:"Gas"::string), 2)
-            as gas,
-        ROUND(TO_NUMBER(c.custom_attributes:"Gas and Electric"::string), 2)
-            as gas_and_electric,
-        ROUND(TO_NUMBER(c.custom_attributes:"Groceries"::string), 2)
-            as groceries,
-        ROUND(TO_NUMBER(c.custom_attributes:"Hair Costs"::string), 2)
-            as hair_costs,
-        ROUND(TO_NUMBER(c.custom_attributes:"Life Insurance"::string), 2)
-            as life_insurance,
-        ROUND(TO_NUMBER(c.custom_attributes:"Medical Prescriptions"::string), 2)
-            as medical_prescriptions,
-        ROUND(TO_NUMBER(c.custom_attributes:"Mortgage"::string), 2)
-            as mortgage,
-        ROUND(TO_NUMBER(c.custom_attributes:"Phone Costs"::string), 2)
-            as phone_costs,
-        ROUND(TO_NUMBER(c.custom_attributes:"Rent"::string), 2)
-            as rent,
-        ROUND(TO_NUMBER(c.custom_attributes:"TV Licence"::string), 2)
-            as tv_licence,
-        c.custom_attributes:"Type of Benefit"::string
-            as type_of_benefit,
-        ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Finance"::string), 2)
-            as vehicle_finance,
-        ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Insurance"::string), 2)
-            as vehicle_insurance,
-        ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Tax"::string), 2)
-            as vehicle_tax,
-        ROUND(TO_NUMBER(c.custom_attributes:"Water"::string), 2)
-            as water
 
-                -- NEWLY ADDED (previously missing)
+        -- EXISTING NON-MONTHLY FIELDS
         ROUND(TO_NUMBER(c.custom_attributes:"TV, Internet and Subscriptions"::string), 2)
             as tv_internet_and_subscriptions,
-
         ROUND(TO_NUMBER(c.custom_attributes:"Fuel"::string), 2)
             as fuel_non_monthly,
-
         ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Insurance"::string), 2)
             as vehicle_insurance_non_monthly,
-
         ROUND(TO_NUMBER(c.custom_attributes:"Vehicle Tax"::string), 2)
             as vehicle_tax_non_monthly,
-
         ROUND(TO_NUMBER(c.custom_attributes:"Car Maintenance"::string), 2)
             as car_maintenance_non_monthly,
-
         ROUND(TO_NUMBER(c.custom_attributes:"Public Transport"::string), 2)
             as public_transport_non_monthly,
-
         ROUND(TO_NUMBER(c.custom_attributes:"Hobbies and Leisure"::string), 2)
             as hobbies_and_leisure_non_monthly,
-
         ROUND(TO_NUMBER(c.custom_attributes:"Childcare Costs"::string), 2)
             as childcare_costs_non_monthly
-
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
@@ -175,73 +117,7 @@ select
     p.started_at,
     p.completed_at,
     p.tags_applied,
-    ct.vulcan_id,
-    ct.phone,
-    ct.email,
-    ct.surplus,
-    ct.vulcan_surplus,
-    ct.total_unsecured_debt_vsapi,
-    ct.total_household_income,
-    ct.total_household_expenditure,
-
-    -- NEW BUDGET FIELDS (existing)
-    ct.monthly_buildings_and_content_insurance_cost,
-    ct.monthly_child_maintenance_payment,
-    ct.monthly_childcare_costs,
-    ct.monthly_clothing_cost,
-    ct.monthly_council_tax_amount,
-    ct.monthly_electric_cost,
-    ct.monthly_energy_costs,
-    ct.monthly_fuel_costs,
-    ct.monthly_gas_cost,
-    ct.monthly_groceries_cost,
-    ct.monthly_hobbies_and_leisure_costs,
-    ct.monthly_income,
-    ct.monthly_internet_and_subscription_costs,
-    ct.monthly_life_insurance_cost,
-    ct.monthly_medical_costs,
-    ct.monthly_mortgage_amount,
-    ct.monthly_public_transport_costs,
-    ct.monthly_rent_amount,
-    ct.monthly_tv_licence_cost,
-    ct.monthly_tv_internet_and_subscription_costs,
-    ct.monthly_vehicle_finance_costs,
-    ct.monthly_vehicle_insurance_cost,
-    ct.monthly_vehicle_tax_cost,
-    ct.monthly_water_cost,
-    ct.buildings_and_contents,
-    ct.bundle_costs,
-    ct.car_maintenance,
-    ct.car_maintenance_cost,
-    ct.child_maintenance,
-    ct.clothing_and_footwear,
-    ct.council_tax,
-    ct.electric,
-    ct.fuel,
-    ct.gas,
-    ct.gas_and_electric,
-    ct.groceries,
-    ct.hair_costs,
-    ct.life_insurance,
-    ct.medical_prescriptions,
-    ct.mortgage,
-    ct.phone_costs,
-    ct.rent,
-    ct.tv_licence,
-    ct.type_of_benefit,
-    ct.vehicle_finance,
-    ct.vehicle_insurance,
-    ct.vehicle_tax,
-    ct.water
-    ct.tv_internet_and_subscriptions,
-    ct.fuel_non_monthly,
-    ct.vehicle_insurance_non_monthly,
-    ct.vehicle_tax_non_monthly,
-    ct.car_maintenance_non_monthly,
-    ct.public_transport_non_monthly,
-    ct.hobbies_and_leisure_non_monthly,
-    ct.childcare_costs_non_monthly
-
+    ct.*
 from pivoted p
 left join contacts ct
   on p.contact_id = ct.contact_id
