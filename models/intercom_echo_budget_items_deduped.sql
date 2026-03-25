@@ -192,4 +192,4 @@ cleaned as (
     where rn_vulcan = 1
 )
 
-select * from cleaned}}
+select * from cleaned
