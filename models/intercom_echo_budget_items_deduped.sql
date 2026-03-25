@@ -1,86 +1,24 @@
 {{ config(materialized='table') }}
 
--- 0. Bring in conversations + contact attributes together
+-- 1. Base table WITH SAFE REMOVAL of test/internal emails
 with base as (
-    select
-        conv.*,
-        ct.vulcan_id,
-        ct.phone,
-        ct.email,
-
-        -- BUDGET FIELDS (all preserved)
-        ct.surplus,
-        ct.total_unsecured_debt_vsapi,
-        ct.total_household_income,
-        ct.total_household_expenditure,
-        ct.monthly_buildings_and_content_insurance_cost,
-        ct.monthly_child_maintenance_payment,
-        ct.monthly_childcare_costs,
-        ct.monthly_clothing_cost,
-        ct.monthly_council_tax_amount,
-        ct.monthly_electric_cost,
-        ct.monthly_energy_costs,
-        ct.monthly_fuel_costs,
-        ct.monthly_gas_cost,
-        ct.monthly_groceries_cost,
-        ct.monthly_hobbies_and_leisure_costs,
-        ct.monthly_internet_and_subscription_costs,
-        ct.monthly_life_insurance_cost,
-        ct.monthly_medical_costs,
-        ct.monthly_mortgage_amount,
-        ct.monthly_public_transport_costs,
-        ct.monthly_rent_amount,
-        ct.monthly_tv_licence_cost,
-        ct.monthly_tv_internet_and_subscription_costs,
-        ct.monthly_vehicle_finance_costs,
-        ct.monthly_vehicle_insurance_cost,
-        ct.monthly_vehicle_tax_cost,
-        ct.monthly_water_cost,
-
-        ct.buildings_and_contents,
-        ct.bundle_costs,
-        ct.car_maintenance,
-        ct.car_maintenance_cost,
-        ct.child_maintenance,
-        ct.clothing_and_footwear,
-        ct.council_tax,
-        ct.electric,
-        ct.fuel,
-        ct.gas,
-        ct.gas_and_electric,
-        ct.groceries,
-        ct.hair_costs,
-        ct.life_insurance,
-        ct.medical_prescriptions,
-        ct.mortgage,
-        ct.phone_costs,
-        ct.rent,
-        ct.tv_licence,
-        ct.vehicle_finance,
-        ct.vehicle_insurance,
-        ct.vehicle_tax,
-        ct.water,
-        ct.childcare_costs,
-        ct.hobbies_and_leisure,
-        ct.public_transport
-
-    from {{ ref('intercom_echo_conversations') }} conv
-    left join {{ ref('intercom_echo_contacts') }} ct
-        on conv.contact_id = ct.contact_id
-    where coalesce(conv.email, '') not ilike '%payplan.com%'
-      and coalesce(conv.email, '') not ilike '%@test.com%'
+    select *
+    from {{ ref('intercom_echo_budget_items') }}
+    where coalesce(email, '') not ilike '%payplan.com%'
+      and coalesce(email, '') not ilike '%@test.com%'
 ),
 
--- 1. Score for conversation-level dedupe
+-- 2. Score for conversation-level dedupe
 scored as (
     select
         *,
-        (case when completed_at is not null then 2 else 0 end) +
-        (case when vulcan_id is not null then 1 else 0 end) as score
+        case when completed_at is not null then 2 else 0 end
+        + case when vulcan_id is not null then 1 else 0 end
+        as score
     from base
 ),
 
--- 2. Pick best row per conversation_id
+-- 3. Pick best row per conversation_id
 ranked_conversation as (
     select
         *,
@@ -97,7 +35,7 @@ deduped_conversation as (
     where rn = 1
 ),
 
--- 3. Backfill vulcan_id within same contact/day
+-- 4. Backfill vulcan_id from other rows for the same contact/day
 vulcan_backfilled as (
     select
         *,
@@ -110,17 +48,18 @@ vulcan_backfilled as (
     from deduped_conversation
 ),
 
--- 4. Add daily grouping
+-- 5. Add daily grouping (same-day dedupe restored)
 daily_scored as (
     select
         *,
         date(started_at) as started_date,
-        (case when completed_at is not null then 2 else 0 end) +
-        (case when vulcan_id_filled is not null then 1 else 0 end) as daily_score
+        case when completed_at is not null then 2 else 0 end
+        + case when vulcan_id_filled is not null then 1 else 0 end
+        as daily_score
     from vulcan_backfilled
 ),
 
--- 5. Dedupe per contact per day
+-- 6. Dedupe per contact_id per day
 ranked_daily as (
     select
         *,
@@ -137,12 +76,13 @@ deduped_daily as (
     where rn_daily = 1
 ),
 
--- 6. Dedupe per contact per day per phone/email
+-- 7. Dedupe per contact_id per day per phone+email
 phone_email_scored as (
     select
         *,
-        (case when completed_at is not null then 2 else 0 end) +
-        (case when vulcan_id_filled is not null then 1 else 0 end) as pe_score
+        case when completed_at is not null then 2 else 0 end
+        + case when vulcan_id_filled is not null then 1 else 0 end
+        as pe_score
     from deduped_daily
 ),
 
@@ -162,12 +102,13 @@ deduped_phone_email as (
     where rn_pe = 1
 ),
 
--- 7. Dedupe per contact per day per vulcan_id
+-- 8. Dedupe per contact_id per day per vulcan_id
 vulcan_scored as (
     select
         *,
-        (case when completed_at is not null then 2 else 0 end) +
-        (case when vulcan_id_filled is not null then 1 else 0 end) as v_score
+        case when completed_at is not null then 2 else 0 end
+        + case when vulcan_id_filled is not null then 1 else 0 end
+        as v_score
     from deduped_phone_email
 ),
 
@@ -181,9 +122,23 @@ ranked_vulcan as (
     from vulcan_scored
 ),
 
--- 8. Final cleaned output
+-- 9. Final cleaned output
 cleaned as (
-    select *
+    select
+        conversation_id,
+        contact_id,
+        started_at,
+        completed_at,
+        tags_applied,
+        vulcan_id_filled as vulcan_id,
+        phone,
+        email,
+        surplus,
+        vulcan_surplus,
+        total_unsecured_debt_vsapi as total_unsecured_debt,
+        total_household_income,
+        total_household_expenditure
+
     from ranked_vulcan
     where rn_vulcan = 1
 )
