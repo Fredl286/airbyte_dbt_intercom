@@ -122,15 +122,15 @@ ranked_vulcan as (
     from vulcan_scored
 ),
 
--- 9. Final cleaned output
+-- 9. Final cleaned output (Access‑safe VARCHAR types)
 cleaned as (
     select
-        conversation_id,
+        conversation_id::varchar(255) as conversation_id,
         contact_id,
         started_at,
         completed_at,
         tags_applied,
-        vulcan_id_filled as vulcan_id,
+        vulcan_id_filled::varchar(255) as vulcan_id,
         phone,
         email,
         surplus,
@@ -138,9 +138,8 @@ cleaned as (
         total_unsecured_debt_vsapi as total_unsecured_debt,
         total_household_income,
         total_household_expenditure
-
     from ranked_vulcan
     where rn_vulcan = 1
 )
 
-select * from cleaned
+select * from cleaned;
