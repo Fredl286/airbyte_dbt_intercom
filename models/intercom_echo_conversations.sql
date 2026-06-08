@@ -11,7 +11,11 @@ tags_exploded as (
         r.contacts:"contacts"[0]:"id"::string as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
+    where t.value:"name"::string in (
+        'Started ECHO Main',
+        'Completed ECHO main',
+        '15K+ Agent (C) 31Mar26 Split test'
+    )
 ),
 
 -- ensure one row per contact_id
@@ -40,7 +44,8 @@ pivoted as (
                  then to_timestamp(te.applied_at_unix) end) as started_at,
         max(case when te.tag_name = 'Completed ECHO main'
                  then to_timestamp(te.applied_at_unix) end) as completed_at,
-        listagg(distinct te.tag_name, ', ') as tags_applied
+        listagg(distinct te.tag_name, ', ') as tags_applied,
+        max(case when te.tag_name = '15K+ Agent (C) 31Mar26 Split test' then 1 else 0 end) as d2a_flag
     from tags_exploded te
     group by te.conversation_id, te.contact_id
 )
@@ -51,6 +56,7 @@ select
     p.started_at,
     p.completed_at,
     p.tags_applied,
+    p.d2a_flag as D2A_FLAG,
     ct.vulcan_id,
     ct.phone,
     ct.email,
