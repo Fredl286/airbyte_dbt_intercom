@@ -130,6 +130,7 @@ cleaned as (
         started_at,
         completed_at,
         tags_applied,
+        coalesce(d2a_flag, 0)::int as D2A_FLAG,
         vulcan_id_filled as vulcan_id,
         phone,
         email,
