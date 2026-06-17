@@ -20,16 +20,20 @@ tags_exploded as (
 contacts as (
     select distinct
         c.id as contact_id,
-        nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
+
+        nullif(
+            trim(lower(c.custom_attributes:"vulcan_id"::string)),
+            ''
+        )::VARCHAR(50) as vulcan_id,
+
         c.phone,
         c.email,
 
-        -- NEW FIELDS ADDED HERE
-        ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure
+        ROUND(TRY_TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
+        ROUND(TRY_TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
+        ROUND(TRY_TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
+        ROUND(TRY_TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
+        ROUND(TRY_TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure
 
     from {{ source('airbyte_intercom','contacts') }} c
 ),
@@ -50,7 +54,9 @@ select
     p.contact_id,
     p.d2a_at as D2A_AT,
     p.tags_applied,
-    ct.vulcan_id,
+
+    ct.vulcan_id::VARCHAR(50) as vulcan_id,
+
     ct.phone,
     ct.email,
     ct.surplus,
@@ -58,6 +64,7 @@ select
     ct.total_unsecured_debt_vsapi,
     ct.total_household_income,
     ct.total_household_expenditure
+
 from pivoted p
 left join contacts ct
   on p.contact_id = ct.contact_id
