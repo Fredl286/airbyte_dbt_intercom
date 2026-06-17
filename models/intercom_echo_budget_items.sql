@@ -32,7 +32,6 @@ contacts as (
         c.phone,
         c.email,
 
-        -- EXISTING FIELDS
         {{ safe_to_number_2dp('c.custom_attributes:"Surplus"::string') }} as surplus,
         {{ safe_to_number_2dp('c.custom_attributes:"Vulcan surplus"::string') }} as vulcan_surplus,
         {{ safe_to_number_2dp('c.custom_attributes:"Total Unsecured Debt VSAPI"::string') }} as total_unsecured_debt_vsapi,
@@ -126,7 +125,7 @@ pivoted as (
 
 select
     p.*,
-    ct.*
+    ct.* exclude (contact_id)
 
 from pivoted p
 left join contacts ct
