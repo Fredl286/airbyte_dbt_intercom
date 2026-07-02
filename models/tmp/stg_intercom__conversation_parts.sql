@@ -2,7 +2,7 @@ with conversation_parts as (
 
     select
         id as part_id,
-        conversation_id,
+        conversation_id::varchar as conversation_id,
 
         -- raw epoch values
         created_at as created_at_epoch,
