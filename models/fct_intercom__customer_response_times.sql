@@ -97,7 +97,7 @@ final as (
 
     select
         c.customer_part_id,
-        c.conversation_id,
+        c.conversation_id::varchar as conversation_id,
         c.customer_message_at,
         c.customer_author_id,
         c.customer_author_type,
