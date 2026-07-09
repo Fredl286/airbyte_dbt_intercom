@@ -12,7 +12,8 @@ tags_exploded as (
     from raw r,
          lateral flatten(input => r.tags:"tags") t
     where t.value:"name"::string in (
-        '15K+ Agent (C) 31Mar26 Split test'
+        '15K+ Agent (C) 31Mar26 Split test',
+        '33% Helpline Triage Split Test 15k D2A 09-07-2026 (A)'
     )
 ),
 
