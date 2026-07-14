@@ -6,15 +6,16 @@ tags_exploded as (
     select distinct
         r.id as conversation_id,
         t.value:"name"::string as tag_name,
+        lower(trim(t.value:"name"::string)) as tag_name_normalized,
         t.value:"applied_at"::bigint as applied_at_unix,
         r.contacts:"contacts"[0]:"id"::string as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in (
-        'Started ECHO Main',
-        'Completed ECHO main',
-        '15K+ Agent (C) 31Mar26 Split test',
-        '33% Helpline Triage Split Test 15k D2A 09-07-2026 (A)'
+    where lower(trim(t.value:"name"::string)) in (
+        'started echo main',
+        'completed echo main',
+        '15k+ agent (c) 31mar26 split test',
+        '33% helpline triage split test 15k d2a 09-07-2026 (a)'
     )
 ),
 -- ensure one row per contact_id
@@ -35,13 +36,13 @@ pivoted as (
     select
         te.conversation_id,
         te.contact_id,
-        max(case when te.tag_name = 'Started ECHO Main'
+        max(case when te.tag_name_normalized = 'started echo main'
                  then to_timestamp(te.applied_at_unix) end) as started_at,
-        max(case when te.tag_name = 'Completed ECHO main'
+        max(case when te.tag_name_normalized = 'completed echo main'
                  then to_timestamp(te.applied_at_unix) end) as completed_at,
-        max(case when te.tag_name in (
-                    '15K+ Agent (C) 31Mar26 Split test',
-                    '33% Helpline Triage Split Test 15k D2A 09-07-2026 (A)'
+        max(case when te.tag_name_normalized in (
+                    '15k+ agent (c) 31mar26 split test',
+                    '33% helpline triage split test 15k d2a 09-07-2026 (a)'
                  )
                  then 1 else 0 end) as d2a_flag,
         listagg(distinct te.tag_name, ', ') as tags_applied
