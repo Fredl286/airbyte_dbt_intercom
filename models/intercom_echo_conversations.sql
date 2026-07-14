@@ -29,7 +29,7 @@ tags_exploded as (
 contacts as (
     select distinct
         c.id as contact_id,
-        nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
+        cast(nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as varchar(50)) as vulcan_id,
         c.phone,
         c.email,
 
