@@ -3,18 +3,28 @@ with raw as (
     from {{ source('airbyte_intercom','conversations') }}
 ),
 
+
+
+
+
 tags_exploded as (
     select distinct
         r.id as conversation_id,
         t.value:"name"::string as tag_name,
         t.value:"applied_at"::bigint as applied_at_unix,
-        r.contacts:"contacts"[0]:"id"::string as contact    from raw r,
+        r.contacts:"contacts"[0]:"id"::string as contact_id
+    from raw r,
          lateral flatten(input => r.tags:"tags") t
     where t.value:"name"::string in (
         'Started ECHO Main',
-        'Completed ECHO main'
+        'Completed ECHO main',
+        '15K+ Agent (C) 31Mar26 Split test'
     )
 ),
+
+
+
+
 
 -- ensure one row per contact_id
 contacts as (
@@ -24,14 +34,27 @@ contacts as (
         c.phone,
         c.email,
 
+
+
+
+
+        -- NEW FIELDS ADDED HERE
         ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure
 
+
+
+
+
     from {{ source('airbyte_intercom','contacts') }} c
 ),
+
+
+
+
 
 pivoted as (
     select
@@ -41,10 +64,15 @@ pivoted as (
                  then to_timestamp(te.applied_at_unix) end) as started_at,
         max(case when te.tag_name = 'Completed ECHO main'
                  then to_timestamp(te.applied_at_unix) end) as completed_at,
-        listagg(distinct te.tag_name, ', ') as tags_applied
+        listagg(distinct te.tag_name, ', ') as tags_applied,
+        max(case when te.tag_name = '15K+ Agent (C) 31Mar26 Split test' then 1 else 0 end) as d2a_flag
     from tags_exploded te
     group by te.conversation_id, te.contact_id
 )
+
+
+
+
 
 select
     p.conversation_id,
@@ -52,6 +80,7 @@ select
     p.started_at,
     p.completed_at,
     p.tags_applied,
+    p.d2a_flag as D2A_FLAG,
     ct.vulcan_id,
     ct.phone,
     ct.email,
