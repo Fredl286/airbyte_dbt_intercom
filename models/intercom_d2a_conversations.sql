@@ -15,31 +15,32 @@ tags_exploded as (
     from raw r,
          lateral flatten(input => r.tags:"tags") t
     where t.value:"name"::string in (
+        'Started ECHO Main',
+        'Completed ECHO main',
         '15K+ Agent (C) 31Mar26 Split test',
         '33% Helpline Triage Split Test 15k D2A 09-07-2026 (A)'
     )
 
 ),
 
--- ensure one row per contact_id
 contacts as (
 
     select distinct
         c.id as contact_id,
 
         nullif(
-            trim(lower(c.custom_attributes:"vulcan_id"::string)),
+            rtrim(c.custom_attributes:"vulcan_id"::string),
             ''
         )::varchar(50) as vulcan_id,
 
         c.phone,
         c.email,
 
-        round(try_to_number(c.custom_attributes:"Surplus"::string), 2) as surplus,
-        round(try_to_number(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
-        round(try_to_number(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
-        round(try_to_number(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
-        round(try_to_number(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure
+        round(to_number(c.custom_attributes:"Surplus"::string), 2) as surplus,
+        round(to_number(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
+        round(to_number(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
+        round(to_number(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
+        round(to_number(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure
 
     from {{ source('airbyte_intercom','contacts') }} c
 
@@ -53,15 +54,30 @@ pivoted as (
 
         max(
             case
+                when te.tag_name = 'Started ECHO Main'
+                then to_timestamp(te.applied_at_unix)
+            end
+        ) as started_at,
+
+        max(
+            case
+                when te.tag_name = 'Completed ECHO main'
+                then to_timestamp(te.applied_at_unix)
+            end
+        ) as completed_at,
+
+        listagg(distinct te.tag_name, ', ') as tags_applied,
+
+        max(
+            case
                 when te.tag_name in (
                     '15K+ Agent (C) 31Mar26 Split test',
                     '33% Helpline Triage Split Test 15k D2A 09-07-2026 (A)'
                 )
-                then to_timestamp(te.applied_at_unix)
+                then 1
+                else 0
             end
-        ) as d2a_at,
-
-        listagg(distinct te.tag_name, ', ') as tags_applied
+        ) as d2a_flag
 
     from tags_exploded te
     group by te.conversation_id, te.contact_id
@@ -71,8 +87,10 @@ pivoted as (
 select
     p.conversation_id,
     p.contact_id,
-    p.d2a_at as d2a_at,
+    p.started_at,
+    p.completed_at,
     p.tags_applied,
+    p.d2a_flag as D2A_FLAG,
 
     ct.vulcan_id::varchar(50) as vulcan_id,
 
