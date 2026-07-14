@@ -29,7 +29,7 @@ contacts as (
     from (
         select
             c.id as contact_id,
-            nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as vulcan_id,
+            nullif(rtrim(c.custom_attributes:"vulcan_id"::varchar(50)), '') as vulcan_id,
             c.phone,
             c.email,
 
