@@ -31,7 +31,7 @@ contacts as (
         nullif(
             rtrim(c.custom_attributes:"vulcan_id"::string),
             ''
-        )::varchar(50) as vulcan_id,
+        ) as vulcan_id,
 
         c.phone,
         c.email,
@@ -92,7 +92,7 @@ select
     p.tags_applied,
     p.d2a_flag as D2A_FLAG,
 
-    ct.vulcan_id::varchar(50) as vulcan_id,
+    ct.vulcan_id,
 
     ct.phone,
     ct.email,
