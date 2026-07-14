@@ -37,6 +37,8 @@ pivoted as (
                  then to_timestamp(te.applied_at_unix) end) as started_at,
         max(case when te.tag_name = 'Completed ECHO main'
                  then to_timestamp(te.applied_at_unix) end) as completed_at,
+        max(case when te.tag_name in ('Started ECHO Main', 'Completed ECHO main')
+                 then 1 else 0 end) as d2a_flag,
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
@@ -46,6 +48,7 @@ select
     p.contact_id,
     p.started_at,
     p.completed_at,
+    p.d2a_flag,
     p.tags_applied,
     ct.vulcan_id,
     ct.phone,
