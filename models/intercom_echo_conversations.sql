@@ -2,11 +2,6 @@ with raw as (
     select *
     from {{ source('airbyte_intercom','conversations') }}
 ),
-
-
-
-
-
 tags_exploded as (
     select distinct
         r.id as conversation_id,
@@ -20,11 +15,6 @@ tags_exploded as (
         'Completed ECHO main'
     )
 ),
-
-
-
-
-
 -- ensure one row per contact_id
 contacts as (
     select distinct
@@ -32,29 +22,13 @@ contacts as (
         cast(nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as varchar(50)) as vulcan_id,
         c.phone,
         c.email,
-
-
-
-
-
-        -- NEW FIELDS ADDED HERE
         ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
         ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure
-
-
-
-
-
     from {{ source('airbyte_intercom','contacts') }} c
 ),
-
-
-
-
-
 pivoted as (
     select
         te.conversation_id,
@@ -67,11 +41,6 @@ pivoted as (
     from tags_exploded te
     group by te.conversation_id, te.contact_id
 )
-
-
-
-
-
 select
     p.conversation_id,
     p.contact_id,
