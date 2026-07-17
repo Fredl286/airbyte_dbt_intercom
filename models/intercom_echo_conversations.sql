@@ -24,11 +24,11 @@ contacts as (
         cast(nullif(rtrim(c.custom_attributes:"vulcan_id"::string), '') as varchar(50)) as vulcan_id,
         c.phone,
         c.email,
-        ROUND(TO_NUMBER(c.custom_attributes:"Surplus"::string), 2) as surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Vulcan Surplus"::string), 2) as vulcan_surplus,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Unsecured Debt VSAPI"::string), 2) as total_unsecured_debt_vsapi,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Income"::string), 2) as total_household_income,
-        ROUND(TO_NUMBER(c.custom_attributes:"Total Household Expenditure"::string), 2) as total_household_expenditure
+        CAST(ROUND(TRY_TO_DECIMAL(c.custom_attributes:"Surplus"::string, 18, 2), 2) AS NUMBER(18,2)) as surplus,
+        CAST(ROUND(TRY_TO_DECIMAL(c.custom_attributes:"Vulcan Surplus"::string, 18, 2), 2) AS NUMBER(18,2)) as vulcan_surplus,
+        CAST(ROUND(TRY_TO_DECIMAL(c.custom_attributes:"Total Unsecured Debt VSAPI"::string, 18, 2), 2) AS NUMBER(18,2)) as total_unsecured_debt_vsapi,
+        CAST(ROUND(TRY_TO_DECIMAL(c.custom_attributes:"Total Household Income"::string, 18, 2), 2) AS NUMBER(18,2)) as total_household_income,
+        CAST(ROUND(TRY_TO_DECIMAL(c.custom_attributes:"Total Household Expenditure"::string, 18, 2), 2) AS NUMBER(18,2)) as total_household_expenditure
     from {{ source('airbyte_intercom','contacts') }} c
 ),
 pivoted as (
