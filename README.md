@@ -1,72 +1,89 @@
-[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+# Intercom Analytics dbt Project
 
-# Intercom Airbyte
+This project transforms Intercom data landed by Airbyte into analyst-facing models in Snowflake.
 
-This package models Intercom data from [Airbyte's connector](https://airbyte.com/connectors/intercom).
+## Data Flow
 
-Let us know which connectors you would like to see next [here](https://19au6qz3a6s.typeform.com/to/c284SPEN)
+1. Airbyte syncs raw Intercom tables into the configured source database/schema.
+2. dbt staging and intermediate models normalize payload fields and timestamps.
+3. dbt mart models produce analyst-facing fact and dimension tables.
 
-## Models
+## Naming Conventions
 
-This package contains staging models, with the following naming conventions across all packages:
+- `stg_*`: source-shaped staging models.
+- `int_*`: reusable intermediate transformations.
+- `fct_*`: event/metric models at a defined business grain.
+- `dim_*`: descriptive entity models for slicing facts.
 
-- Boolean fields are prefixed with `is_` or `has_`
-- Timestamps are appended with `_timestamp`
-- ID primary keys are prefixed with the name of the table. For example, the campaign table's ID column is renamed `campaign_id`.
+Additional standards used in marts:
 
-## DBT Metrics
+- IDs are normalized to `VARCHAR(50)` using `normalize_id(...)`.
+- Budget/currency fields are normalized to `NUMBER(38,2)` using `safe_to_number_38_2(...)`.
 
-This package contains configurations for DBT metrics for you to get up and running quickly with standard Intercom metrics in your existing BI tools.
+Macro files:
 
-## Installation Instructions
+- `macros/id_normalization.sql`
+- `macros/numeric_normalization.sql`
 
-Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions, or [read the dbt docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
+## Current Mart Models
 
-Include in your `packages.yml`
+Primary models currently in use:
 
-```yaml
-packages:
-  - package: cerebriumAI/dbt-intercom
-    version: ["0.1.0"]
-```
+- `dim_intercom__contacts`
+- `fct_intercom__admin_metrics`
+- `fct_intercom__conversations`
+- `fct_intercom__conversation_metrics`
+- `fct_intercom__customer_response_times`
+- `fct_intercom__agent_only_responses_3_months`
+- `fct_intercom__echo_conversations`
+- `fct_intercom__echo_conversations_deduped`
+- `fct_intercom__echo_budget_items`
+- `fct_intercom__echo_budget_items_deduped`
+- `fct_intercom__d2a_conversations`
+- `fct_intercom__conversations_alltags`
+- `fct_intercom__useful_guides_ugtags`
+
+## Source Notes
+
+- Companies are still synced in raw via Airbyte.
+- Companies transformation models were intentionally removed due low volume and low analytical value.
+
+## Dependencies
+
+Defined in `packages.yml`:
+
+- `fivetran/fivetran_utils`
+- `godatadriven/dbt_date`
+
+`package-lock.yml` is committed for reproducible dependency resolution.
 
 ## Configuration
 
-### Source Data Location
+Project variables in `dbt_project.yml`:
 
-By default, this package will look for your Intercom data in the `intercom` schema of your [target database](https://docs.getdbt.com/docs/running-a-dbt-project/using-the-command-line-interface/configure-your-profile). If this is not where your Intercom data is, please add the following configuration to your `dbt_project.yml` file:
+- `intercom_schema`
+- `intercom_database`
+- `intercom_mart_schema`
+- `intercom_staging_schema`
 
-```yml
-# dbt_project.yml
----
-config-version: 2
+These should point to the raw Airbyte destination for Intercom streams.
 
-vars:
-  intercom_schema: your_schema_name
-  intercom_database: your_database_name
-```
+Recommended test isolation pattern:
 
-## Database Support
+- Keep raw reads in `AIRBYTE_SCHEMA`.
+- Build `models/tmp/*` into `INTERCOM_STAGING_UAT`.
+- Build mart models into `INTERCOM_ANALYTICS_UAT`.
 
-This package has been tested on BigQuery, Snowflake, Redshift, Postgres, and Databricks.
+This keeps analyst-facing production tables untouched while testing model changes.
 
-### Databricks Dispatch Configuration
+## Analyst Change Control
 
-dbt `v0.20.0` introduced a new project-level dispatch configuration that enables an "override" setting for all dispatched macros. If you are using a Databricks destination with this package you will need to add the below (or a variation of the below) dispatch configuration within your `dbt_project.yml`. This is required in order for the package to accurately search for macros within the `dbt-labs/spark_utils` then the `dbt-labs/dbt_utils` packages respectively.
+All potentially report-impacting changes are logged in:
 
-```yml
-# dbt_project.yml
+- `ANALYST_CHANGELOG.md`
 
-dispatch:
-  - macro_namespace: dbt_utils
-    search_order: ["spark_utils", "dbt_utils"]
-```
+Review this file before promoting model changes to production.
 
-## Contributions
+## Known Follow-up
 
-Additional contributions to this package are very welcome! Please create issues or open PRs against `master`. Check out [this post](https://discourse.getdbt.com/t/contributing-to-a-dbt-package/657) on the best workflow for contributing to a package. Suggestions to the DBT metrics are welcome too!
-
-## Resources:
-
-- Provide [feedback](https://19au6qz3a6s.typeform.com/to/c284SPEN) on our existing dbt packages or what you'd like to see next
-- Join our [Slack community](https://join.slack.com/t/cerebriumworkspace/shared_invite/zt-18jv58mb5-TyxTOIUcAF4Ho4ZiyhAf8Q) where we inform you about changes to packages, our roadmap as well as reach out for any help
+- Run a full dbt Cloud test build and validate analyst dashboards before production promotion.

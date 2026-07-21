@@ -1,6 +1,6 @@
 with conversation_metrics as (
     select *
-    from {{ ref('intercom__conversation_metrics') }}
+    from {{ ref('fct_intercom__conversation_metrics') }}
     where assignee_type = 'admin'
 ),
 
@@ -27,10 +27,9 @@ median_metrics as (
         last_closed_by_id,
         {{ fivetran_utils.percentile("conversation_metrics.count_reopens", "last_closed_by_id", "0.5") }} as median_conversations_reopened,
         {{ fivetran_utils.percentile("conversation_metrics.count_assignments", "last_closed_by_id", "0.5") }} as median_conversation_assignments,
-        {{ fivetran_utils.percentile("conversation_metrics.time_to_first_response_minutes", "last_closed_by_id", "0.5") }} as median_time_to_first_response_time_minutes
+        {{ fivetran_utils.percentile("conversation_metrics.time_to_first_response_minutes", "last_closed_by_id", "0.5") }} as median_time_to_first_response_time_minutes,
+        {{ fivetran_utils.percentile("conversation_metrics.time_to_last_close_minutes", "last_closed_by_id", "0.5") }} as median_time_to_last_close_minutes
     from conversation_metrics
-
-    group by 1
 ),
 
 --Joins the aggregate, and median CTEs to the admin table with team enrichment. Distinct is necessary to keep grain with median values and aggregates.
@@ -44,7 +43,9 @@ final as (
     admin_metrics.average_conversation_parts,
     admin_metrics.average_conversation_rating,
     median_metrics.median_conversations_reopened,
-    median_metrics.median_conversation_assignments
+    median_metrics.median_conversation_assignments,
+    median_metrics.median_time_to_first_response_time_minutes,
+    median_metrics.median_time_to_last_close_minutes
 from admin_table
 
 left join admin_metrics

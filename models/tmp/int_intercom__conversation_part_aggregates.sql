@@ -1,37 +1,60 @@
 with conversation_parts as (
-    select *
+    select
+        conversation_id,
+        part_id,
+        author_id,
+        author_type,
+        part_type,
+        created_at_timestamp,
+        updated_at_timestamp,
+        created_at_date,
+        updated_at_date
     from {{ ref('stg_intercom__conversation_parts') }}
 ),
 
 latest_conversation as (
-     select *
-     from {{ ref('int_intercom__latest_conversation') }}
- ),
+    select *
+    from {{ ref('int_intercom__latest_conversation') }}
+),
 
---Aggregates conversation part data related to a single conversation from the int_intercom__latest_conversation model. See below for specific aggregates.
-final as (
- select
-     latest_conversation.conversation_id,
-     latest_conversation.created_at_date as conversation_created_at_date,
-     count(conversation_parts.conversation_part_id) as count_total_parts,
-     min(case when conversation_parts.part_type = 'comment' and conversation_parts.author_type in ('lead','user') then conversation_parts.created_at_date else null end) as first_contact_reply_at,
-     min(case when conversation_parts.part_type like '%assignment%' then conversation_parts.created_at_date else null end) as first_assignment_at,
-     min(case when conversation_parts.part_type = 'comment' and conversation_parts.author_type = 'admin' then conversation_parts.created_at_date else null end) as first_admin_response_at,
-     min(case when conversation_parts.part_type = 'open' then conversation_parts.created_at_date else null end) as first_reopen_at,
-     max(case when conversation_parts.part_type like '%assignment%' then conversation_parts.created_at_date else null end) as last_assignment_at,
-     max(case when conversation_parts.part_type = 'comment' and conversation_parts.author_type in ('lead','user') then conversation_parts.created_at_date else null end) as last_contact_reply_at,
-     max(case when conversation_parts.part_type = 'comment' and conversation_parts.author_type = 'admin' then conversation_parts.created_at_date else null end) as last_admin_response_at,
-     max(case when conversation_parts.part_type = 'open' then conversation_parts.created_at_date else null end) as last_reopen_at,
-     sum(case when conversation_parts.part_type like '%assignment%' then 1 else 0 end) as count_assignments,
-     sum(case when conversation_parts.part_type = 'open' then 1 else 0 end) as count_reopens
- from latest_conversation
+aggregates as (
+    select
+        cp.conversation_id,
 
-      left join conversation_parts
-        on latest_conversation.conversation_id = conversation_parts.conversation_id
+        -- total parts
+        count(*) as count_total_parts,
 
- group by 1, 2
+        -- reopen and assignment counts
+        sum(case when lower(cp.part_type) = 'reopen' then 1 else 0 end) as count_reopens,
+        sum(case when lower(cp.part_type) = 'assignment' then 1 else 0 end) as count_assignments,
 
+        -- first/last part timestamps and dates
+        min(cp.created_at_timestamp) as first_part_timestamp,
+        max(cp.updated_at_timestamp) as last_part_timestamp,
+        min(cp.created_at_date) as first_part_date,
+        max(cp.updated_at_date) as last_part_date,
+
+        -- time to first admin response (minutes)
+        datediff(
+            minute,
+            min(cp.created_at_timestamp),
+            min(case when cp.author_type = 'admin' then cp.created_at_timestamp end)
+        ) as time_to_first_response_minutes,
+
+        -- time to last close (minutes)
+        datediff(
+            minute,
+            min(cp.created_at_timestamp),
+            max(case when lower(cp.part_type) = 'close' then cp.created_at_timestamp end)
+        ) as time_to_last_close_minutes,
+
+        lc.updated_at_timestamp as latest_conversation_timestamp,
+        lc.updated_at_date as latest_conversation_date
+    from conversation_parts cp
+    join latest_conversation lc
+      on cp.conversation_id = lc.conversation_id
+    group by cp.conversation_id, lc.updated_at_timestamp, lc.updated_at_date
 )
 
 select *
-from final
+from aggregates

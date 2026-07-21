@@ -1,69 +1,42 @@
-with conversation_rating as (
-    select
-        rating,
-        remark,
-        _airbyte_conversations_hashid
-    from {{ var('conversations_conversation_rating') }}
-),
+with conversations as (
 
-conversations_sla_applied as (
     select
-        sla_name,
-        sla_status,
-        _airbyte_conversations_hashid
-    from {{ var('conversations_sla_applied') }}
-),
+        {{ normalize_id('id') }} as conversation_id,
 
-conversations_assignee as (
-    select
-        id as assignee_id,
-        name as assignee_name,
-        type as assignee_type,
-        email as assignee_email,
-        _airbyte_conversations_hashid
-    from {{ var('conversations_assignee') }}
-),
+        -- raw epoch values
+        created_at as created_at_epoch,
+        updated_at as updated_at_epoch,
 
-conversations_statistics as (
-    select
-        last_closed_by_id,
-        _airbyte_conversations_hashid
-    from {{ var('conversations_statistics') }}
-),
+        -- converted to TIMESTAMP
+        {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_timestamp,
+        {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_timestamp,
 
-conversations as (
-    select
-        id as conversation_id,
-        created_at as created_at_timestamp,
-        updated_at as updated_at_timestamp,
+        -- also expose as *_date for downstream models that expect that alias
         {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_date,
         {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_date,
+
         type as conversation_type,
         title as conversation_title,
         state as conversation_state,
         read as is_read,
-        *
-    from {{ var('conversations') }}
-),
 
-final as (
-    select
-        conversations.*,
-        conversation_rating.rating as conversation_rating_value,
-        conversation_rating.remark as conversation_remark,
-        conversations_sla_applied.sla_name,
-        conversations_sla_applied.sla_status,
-        conversations_assignee.assignee_id,
-        conversations_assignee.assignee_name,
-        conversations_assignee.assignee_type,
-        conversations_assignee.assignee_email,
-        conversations_statistics.last_closed_by_id
-    from conversations
+        conversation_rating:rating::integer as conversation_rating_value,
+        conversation_rating:remark::string as conversation_remark,
 
-        left join conversation_rating using (_airbyte_conversations_hashid)
-        left join conversations_assignee using (_airbyte_conversations_hashid)
-        left join conversations_sla_applied using (_airbyte_conversations_hashid)
-        left join conversations_statistics using (_airbyte_conversations_hashid)
+        sla_applied:sla_name::string as sla_name,
+        sla_applied:sla_status::string as sla_status,
+
+        {{ normalize_id('assignee:id') }} as assignee_id,
+        assignee:name::string as assignee_name,
+        assignee:type::string as assignee_type,
+        assignee:email::string as assignee_email,
+
+        {{ normalize_id('statistics:last_closed_by_id') }} as last_closed_by_id,
+
+        _AIRBYTE_RAW_ID
+    from {{ source('airbyte_intercom','conversations') }}
+
 )
 
-select * from final
+select *
+from conversations
