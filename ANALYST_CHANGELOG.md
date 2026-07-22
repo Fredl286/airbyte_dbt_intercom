@@ -23,7 +23,6 @@ Use the renamed datasets in reporting queries/models:
 Removed outputs:
 
 - `echo_dd`
-- companies transformed datasets (raw source still available)
 
 ### 2. Update Field References
 
@@ -61,13 +60,11 @@ Potential reporting impact:
 - Joins between these models and external systems should be more reliable.
 - Some previously blank/whitespace IDs may now appear as null.
 
-Validation status:
-- Structural/type change; validate in dbt Cloud run.
 
 ### Change Set 2 - Naming and Dataset Rationalization
 
 Files changed:
-- `echo_dd` removed
+- `echo_dd` removed as it was redundant/available elsewhere
 - Custom marts renamed to consistent lowercase `fct_intercom__*`
 - Legacy `intercom__*` marts converted to `fct_`/`dim_` naming where retained
 
@@ -81,24 +78,6 @@ Potential reporting impact:
 - Any existing queries using old model names must be updated to new names.
 - Case-sensitive consumers need to reference `d2a_flag` (lowercase).
 
-Validation status:
-- Structural rename change; validate in dbt Cloud run.
-
-### Change Set 3 - Companies Dataset Removed from Transformed Layer
-
-Files changed:
-- Companies staging/intermediate/dimension models removed
-
-What changed:
-- Removed transformed companies outputs due low volume and low analytical value.
-- Raw companies source data remains available if needed later.
-
-Potential reporting impact:
-- Any downstream use of transformed companies model must be removed/replaced.
-
-Validation status:
-- Structural removal; validate in dbt Cloud run.
-
 ### Change Set 4 - Budget Currency Precision Correction
 
 Files changed:
@@ -111,6 +90,3 @@ What changed:
 
 Potential reporting impact:
 - Monetary totals now include pence and may differ from earlier integer-rounded reports.
-
-Validation status:
-- Structural/type correction; validate totals in dbt Cloud run.

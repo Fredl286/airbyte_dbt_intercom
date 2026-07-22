@@ -14,15 +14,12 @@ Purpose: Record implemented naming/access standards and the remaining checks bef
   - `rpt_*` for presentation/consumer-specific wide tables.
 
 ## Access Policy
-
 - Analysts: read access to mart schema only.
-- Analytics engineering: read/write access to staging, intermediate, and mart schemas.
-- BI tools: point semantic models to mart schema only.
+
 
 ## Implemented Model Set
 
 Mart models currently present:
-
 - models/fct_intercom__admin_metrics.sql
 - models/dim_intercom__contacts.sql
 - models/fct_intercom__conversations.sql
@@ -52,7 +49,7 @@ Internal support models:
 - models/tmp/int_intercom__latest_conversation.sql
 - models/tmp/int_intercom__conversation_part_aggregates.sql
 
-## Analyst Exposure Recommendation
+## Analyst Exposure
 
 Expose these models in mart schema:
 
