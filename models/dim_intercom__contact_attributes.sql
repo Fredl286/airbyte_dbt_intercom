@@ -15,4 +15,4 @@ select
     messenger_writable,
     created_at_timestamp,
     updated_at_timestamp
-from {{ ref('stg_intercom__contact_attributes') }}
+from {{ ref('int_intercom__latest_contact_attribute') }}

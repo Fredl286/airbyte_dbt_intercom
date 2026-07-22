@@ -9,4 +9,4 @@ select
     away_mode_reassign,
     team_ids,
     avatar
-from {{ ref('stg_intercom__admins') }}
+from {{ ref('int_intercom__latest_admin') }}
