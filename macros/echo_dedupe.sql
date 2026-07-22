@@ -20,8 +20,7 @@ scored_conversation as (
             {% for field in completeness_fields %}
             case
                 when {{ field }} is null then 0
-                when try_to_varchar({{ field }}) is null then 1
-                when nullif(trim(try_to_varchar({{ field }})), '') is not null then 1
+                when nullif(trim(to_varchar({{ field }})), '') is not null then 1
                 else 0
             end{% if not loop.last %} +{% endif %}
             {% endfor %}
@@ -101,8 +100,7 @@ scored_person_day as (
             {% for field in completeness_fields %}
             case
                 when {{ field }} is null then 0
-                when try_to_varchar({{ field }}) is null then 1
-                when nullif(trim(try_to_varchar({{ field }})), '') is not null then 1
+                when nullif(trim(to_varchar({{ field }})), '') is not null then 1
                 else 0
             end{% if not loop.last %} +{% endif %}
             {% endfor %}
