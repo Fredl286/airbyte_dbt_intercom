@@ -26,7 +26,7 @@ cleaned as (
         started_at,
         completed_at,
         tags_applied,
-        coalesce(d2a_flag, 0)::int as d2a_flag,
+        cast(coalesce(d2a_flag, 0) as number(1,0)) as d2a_flag,
         {{ normalize_id('vulcan_id_filled') }} as vulcan_id,
         phone,
         email,
