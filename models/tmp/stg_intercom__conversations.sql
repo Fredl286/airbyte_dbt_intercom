@@ -31,7 +31,10 @@ with conversations as (
         assignee:type::string as assignee_type,
         assignee:email::string as assignee_email,
 
-        {{ normalize_id('statistics:last_closed_by_id') }} as last_closed_by_id,
+        coalesce(
+            {{ normalize_id('statistics:last_closed_by_id') }},
+            {{ normalize_id('assignee:id') }}
+        ) as last_closed_by_id,
 
         _AIRBYTE_RAW_ID
     from {{ source('airbyte_intercom','conversations') }}
