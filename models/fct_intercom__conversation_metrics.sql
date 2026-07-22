@@ -11,7 +11,6 @@ part_aggregates as (
 final as (
 	select
 		c.conversation_id,
-		c.assignee_type,
 		c.last_closed_by_id,
 		c.conversation_state,
 		c.conversation_rating,

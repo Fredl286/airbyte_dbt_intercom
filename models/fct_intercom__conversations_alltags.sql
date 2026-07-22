@@ -8,7 +8,7 @@ tags_exploded as (
         {{ normalize_id('r.id') }} as conversation_id,
         t.value:"name"::string as tag_name,
         t.value:"applied_at"::bigint as applied_at_unix,
-        to_timestamp(t.value:"applied_at"::bigint) as tag_applied_at,
+        {{ epoch_to_timestamp('t.value:"applied_at"::bigint') }} as tag_applied_at,
         {{ normalize_id('r.contacts:"contacts"[0]:"id"') }} as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t

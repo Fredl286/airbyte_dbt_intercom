@@ -99,10 +99,10 @@ pivoted as (
         te.contact_id,
 
         max(case when te.tag_name = 'Started ECHO Main'
-                 then to_timestamp(te.applied_at_unix) end) as started_at,
+                 then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as started_at,
 
         max(case when te.tag_name = 'Completed ECHO main'
-                 then to_timestamp(te.applied_at_unix) end) as completed_at,
+                 then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as completed_at,
 
         max(case when te.tag_name in (
                 'Auto UG | Error',
@@ -114,7 +114,7 @@ pivoted as (
                 'Auto UG - Short Time To Repay',
                 'Auto UG - Zero Offer'
             )
-            then to_timestamp(te.applied_at_unix)
+            then {{ epoch_to_timestamp('te.applied_at_unix') }}
         end) as auto_ug_at,
 
         listagg(distinct te.tag_name, ', ') as tags_applied

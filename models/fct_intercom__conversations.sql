@@ -19,7 +19,6 @@ conversations as (
         conversation_remark,
         sla_name,
         sla_status,
-        assignee_type,
         last_closed_by_id
 
     from latest_conversation

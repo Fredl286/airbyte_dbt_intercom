@@ -84,7 +84,7 @@ pivoted as (
                     '15K+ Agent (C) 31Mar26 Split test',
                     '33% Helpline Triage Split Test 15k D2A 09-07-2026 (A)'
                 )
-                then to_timestamp(te.applied_at_unix)
+                then {{ epoch_to_timestamp('te.applied_at_unix') }}
             end
         ) as d2a_at,
 

@@ -69,8 +69,6 @@ models:
         description: Title of the conversation.
       - name: last_closed_by_id
         description: Admin who last closed the conversation.
-      - name: assignee_type
-        description: Current assignee type on the conversation.
       - name: conversation_rating
         description: Rating value for the conversation, if available.
       - name: conversation_remark
@@ -109,8 +107,6 @@ models:
         description: Optional rating (1–5).
       - name: conversation_remark
         description: Optional remark corresponding to rating.
-      - name: assignee_type
-        description: Current assignee type from conversation metadata.
       - name: last_closed_by_id
         description: Admin identifier who last closed the conversation.
 

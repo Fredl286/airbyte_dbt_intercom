@@ -25,6 +25,7 @@ Macro files:
 - `macros/id_normalization.sql`
 - `macros/numeric_normalization.sql`
 - `macros/echo_dedupe.sql`
+- `macros/epoch_to_timestamp.sql`
 
 ## ECHO Dedupe Logic
 

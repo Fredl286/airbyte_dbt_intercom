@@ -8,12 +8,12 @@ with conversations as (
         updated_at as updated_at_epoch,
 
         -- converted to TIMESTAMP
-        {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_timestamp,
-        {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_timestamp,
+        {{ epoch_to_timestamp('created_at') }} as created_at_timestamp,
+        {{ epoch_to_timestamp('updated_at') }} as updated_at_timestamp,
 
         -- also expose as *_date for downstream models that expect that alias
-        {{ dbt_date.from_unixtimestamp('created_at') }} as created_at_date,
-        {{ dbt_date.from_unixtimestamp('updated_at') }} as updated_at_date,
+        {{ epoch_to_timestamp('created_at') }} as created_at_date,
+        {{ epoch_to_timestamp('updated_at') }} as updated_at_date,
 
         type as conversation_type,
         title as conversation_title,

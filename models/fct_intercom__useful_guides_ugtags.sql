@@ -52,14 +52,28 @@ pivoted as (
     select
         te.conversation_id,
         te.contact_id,
-        max(to_timestamp(te.applied_at_unix)) as latest_tag_time,
+        max({{ epoch_to_timestamp('te.applied_at_unix') }}) as latest_tag_time,
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
 ),
 
 final as (
-    select *
+    select
+        x.conversation_id,
+        x.contact_id,
+        x.latest_tag_time,
+        x.tags_applied,
+        x.vulcan_id,
+        x.phone,
+        x.email,
+        x.surplus,
+        x.vulcan_surplus,
+        x.total_unsecured_debt_vsapi,
+        x.total_household_income,
+        x.total_household_expenditure,
+        x.surplus_flag,
+        x.debt_flag
     from (
         select
             p.conversation_id,
@@ -104,8 +118,8 @@ final as (
         from pivoted p
         left join contacts ct
           on p.contact_id = ct.contact_id
-    )
-    where rn = 1
+    ) x
+    where x.rn = 1
 )
 
 select *
