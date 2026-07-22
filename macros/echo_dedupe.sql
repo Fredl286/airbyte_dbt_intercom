@@ -50,8 +50,11 @@ conversation_aggregated as (
         max(b.completed_at) as completed_at_merged,
         listagg(distinct nullif(trim(t.value::string), ''), ', ')
             within group (order by nullif(trim(t.value::string), '')) as tags_applied_merged
-    from base b
-    left join lateral flatten(input => split(coalesce(b.tags_applied, ''), ',')) t on true
+    from base b,
+         lateral flatten(
+             input => split(coalesce(b.tags_applied, ''), ','),
+             outer => true
+         ) t
     group by b.conversation_id
 ),
 deduped_conversation as (
