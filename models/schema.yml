@@ -129,6 +129,112 @@ models:
       - name: vulcan_id
         description: Vulcan ID from custom attributes (blank if missing).
 
+  - name: dim_intercom__admins
+    description: >
+      Each record represents a single Intercom admin (agent) with their profile and availability attributes.
+    columns:
+      - name: admin_id
+        description: Unique identifier for the admin.
+        tests:
+          - not_null
+          - unique
+      - name: admin_name
+        description: Full name of the admin.
+      - name: admin_type
+        description: Type of admin (admin or team).
+      - name: email
+        description: Email address of the admin.
+      - name: job_title
+        description: Job title of the admin.
+      - name: has_inbox_seat
+        description: Whether the admin has an inbox seat assigned.
+      - name: away_mode_enabled
+        description: Whether the admin is currently in away mode.
+      - name: away_mode_reassign
+        description: Whether conversations are reassigned when the admin is away.
+      - name: team_ids
+        description: Array of team IDs the admin belongs to.
+      - name: avatar
+        description: Avatar object for the admin.
+
+  - name: dim_intercom__teams
+    description: >
+      Each record represents a single Intercom team with its member admin IDs.
+    columns:
+      - name: team_id
+        description: Unique identifier for the team.
+        tests:
+          - not_null
+          - unique
+      - name: team_name
+        description: Name of the team.
+      - name: team_type
+        description: Type value for the team object.
+      - name: admin_ids
+        description: Array of admin IDs that are members of this team.
+
+  - name: dim_intercom__segments
+    description: >
+      Each record represents a single Intercom segment (a saved filter group of contacts or users).
+    columns:
+      - name: segment_id
+        description: Unique identifier for the segment.
+        tests:
+          - not_null
+          - unique
+      - name: segment_name
+        description: Name of the segment.
+      - name: segment_type
+        description: Type of segment.
+      - name: member_count
+        description: Number of contacts/users in the segment.
+      - name: person_type
+        description: Whether the segment applies to users or leads.
+      - name: created_at_timestamp
+        description: Timestamp when the segment was created.
+      - name: updated_at_timestamp
+        description: Timestamp when the segment was last updated.
+
+  - name: dim_intercom__contact_attributes
+    description: >
+      Each record represents a single custom or standard contact attribute definition in Intercom.
+    columns:
+      - name: attribute_id
+        description: Unique identifier for the contact attribute.
+        tests:
+          - not_null
+          - unique
+      - name: attribute_name
+        description: Internal name of the attribute.
+      - name: attribute_type
+        description: Type classification of the attribute.
+      - name: label
+        description: Human-readable label for the attribute.
+      - name: model
+        description: The model this attribute belongs to (contact, company).
+      - name: custom
+        description: Whether this is a custom attribute.
+      - name: data_type
+        description: Data type of the attribute value (string, integer, boolean, etc.).
+      - name: full_name
+        description: Fully qualified name of the attribute.
+      - name: description
+        description: Description of the attribute.
+      - name: admin_id
+        description: Admin who created the attribute.
+      - name: archived
+        description: Whether the attribute has been archived.
+      - name: ui_writable
+        description: Whether the attribute can be edited via the UI.
+      - name: api_writable
+        description: Whether the attribute can be written via the API.
+      - name: messenger_writable
+        description: Whether the attribute can be set via the Messenger.
+      - name: created_at_timestamp
+        description: Timestamp when the attribute was created.
+      - name: updated_at_timestamp
+        description: Timestamp when the attribute was last updated.
+
 sources:
   - name: airbyte_intercom
     schema: "{{ var('intercom_schema', 'intercom') }}"
@@ -143,3 +249,6 @@ sources:
       - name: conversations_sla_applied
       - name: conversations_assignee
       - name: conversations_statistics
+      - name: teams
+      - name: segments
+      - name: contact_attributes

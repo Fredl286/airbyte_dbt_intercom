@@ -61,6 +61,10 @@ This ensures conversion reporting prefers completed and Vulcan-linked ECHO recor
 Primary models currently in use:
 
 - `dim_intercom__contacts`
+- `dim_intercom__admins`
+- `dim_intercom__teams`
+- `dim_intercom__segments`
+- `dim_intercom__contact_attributes`
 - `fct_intercom__admin_metrics`
 - `fct_intercom__conversations`
 - `fct_intercom__conversation_metrics`
