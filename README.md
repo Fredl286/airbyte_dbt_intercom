@@ -24,6 +24,36 @@ Macro files:
 
 - `macros/id_normalization.sql`
 - `macros/numeric_normalization.sql`
+- `macros/echo_dedupe.sql`
+
+## ECHO Dedupe Logic
+
+The ECHO deduped models use a shared macro to enforce consistent conversion logic:
+
+- `fct_intercom__echo_conversations_deduped`
+- `fct_intercom__echo_budget_items_deduped`
+
+Macro used:
+
+- `echo_dedupe_rows(...)` in `macros/echo_dedupe.sql`
+
+Current behavior:
+
+1. Filter out internal/test emails (`%payplan.com%`, `%@test.com%`).
+2. Merge records with the same `conversation_id` so split rows are consolidated:
+	- `started_at` keeps the earliest non-null value.
+	- `completed_at` keeps the latest non-null value.
+	- `tags_applied` is combined across rows (distinct values).
+3. Build a person key using this fallback order:
+	- `contact_id`, then `email`, then `phone`, then `conversation_id`.
+4. Keep one record per person per day (`person_key` + `event_date`).
+5. Ranking priority is strict (not weighted blending):
+	- records with `completed_at` first,
+	- then records with `vulcan_id` (or filled Vulcan ID),
+	- then records with more populated completeness fields,
+	- then latest timestamps as tie-breakers.
+
+This ensures conversion reporting prefers completed and Vulcan-linked ECHO records, even when another record has more non-critical fields populated.
 
 ## Current Mart Models
 
