@@ -43,11 +43,6 @@ Primary models currently in use:
 - `fct_intercom__conversations_alltags`
 - `fct_intercom__useful_guides_ugtags`
 
-## Source Notes
-
-- Companies are still synced in raw via Airbyte.
-- Companies transformation models were intentionally removed due low volume and low analytical value.
-
 ## Dependencies
 
 Defined in `packages.yml`:
@@ -66,24 +61,9 @@ Project variables in `dbt_project.yml`:
 - `intercom_mart_schema`
 - `intercom_staging_schema`
 
-These should point to the raw Airbyte destination for Intercom streams.
 
-Recommended test isolation pattern:
+Schema Structure:
 
-- Keep raw reads in `AIRBYTE_SCHEMA`.
+- Keep raw data in `AIRBYTE_SCHEMA`.
 - Build `models/tmp/*` into `INTERCOM_STAGING_UAT`.
 - Build mart models into `INTERCOM_ANALYTICS_UAT`.
-
-This keeps analyst-facing production tables untouched while testing model changes.
-
-## Analyst Change Control
-
-All potentially report-impacting changes are logged in:
-
-- `ANALYST_CHANGELOG.md`
-
-Review this file before promoting model changes to production.
-
-## Known Follow-up
-
-- Run a full dbt Cloud test build and validate analyst dashboards before production promotion.
