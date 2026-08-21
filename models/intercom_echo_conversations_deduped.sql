@@ -136,6 +136,7 @@ cleaned as (
         email,
         surplus,
         vulcan_surplus,
+        total_debt as total_debt_form,
         total_unsecured_debt_vsapi as total_unsecured_debt,
         total_household_income,
         total_household_expenditure
