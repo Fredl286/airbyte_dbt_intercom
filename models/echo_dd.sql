@@ -122,22 +122,27 @@ ranked_vulcan as (
     from vulcan_scored
 ),
 
--- 9. Final cleaned output (Access‑safe VARCHAR types)
+-- 9. Final cleaned output
 cleaned as (
     select
-        conversation_id::varchar(255) as conversation_id,
+        conversation_id,
         contact_id,
         started_at,
         completed_at,
         tags_applied,
-        vulcan_id_filled::varchar(255) as vulcan_id,
+        coalesce(d2a_flag, 0)::int as D2A_FLAG,
+        vulcan_id_filled as vulcan_id,
         phone,
         email,
         surplus,
         vulcan_surplus,
+        total_debt_form,
         total_unsecured_debt_vsapi as total_unsecured_debt,
+        total_debt_with_ccjs,
+        coalesce(total_debt_with_ccjs, total_unsecured_debt_vsapi) as "CLEAN_TOTAL_DEBT",
         total_household_income,
         total_household_expenditure
+
     from ranked_vulcan
     where rn_vulcan = 1
 )
