@@ -139,7 +139,7 @@ cleaned as (
         total_debt_form,
         total_unsecured_debt_vsapi as total_unsecured_debt,
         total_debt_with_ccjs,
-        CLEAN_TOTAL_DEBT,
+        coalesce(total_debt_with_ccjs, total_unsecured_debt_vsapi) as "CLEAN_TOTAL_DEBT",
         total_household_income,
         total_household_expenditure
 
