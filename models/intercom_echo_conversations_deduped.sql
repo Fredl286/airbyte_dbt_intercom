@@ -8,7 +8,7 @@ with base as (
       and coalesce(email, '') not ilike '%@test.com%'
 ),
 
--- 1b. Backfill started_at onto the completed row when the same contact_id
+-- 1b. Backfill started_at/tags_applied onto the completed row when the same contact_id
 --     has a separate conversation_id for the "Started" vs "Completed" event
 conversation_filled as (
     select
@@ -20,7 +20,20 @@ conversation_filled as (
                     order by coalesce(started_at, completed_at)
                     rows between unbounded preceding and 1 preceding
                 )
-            ) as started_at
+            ) as started_at,
+            case
+                when started_at is null then
+                    concat_ws(
+                        ', ',
+                        max_by(tags_applied, started_at) over (
+                            partition by contact_id
+                            order by coalesce(started_at, completed_at)
+                            rows between unbounded preceding and 1 preceding
+                        ),
+                        tags_applied
+                    )
+                else tags_applied
+            end as tags_applied
         )
     from base
 ),
