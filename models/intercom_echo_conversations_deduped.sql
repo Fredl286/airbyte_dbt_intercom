@@ -8,6 +8,23 @@ with base as (
       and coalesce(email, '') not ilike '%@test.com%'
 ),
 
+-- 1b. Backfill started_at onto the completed row when the same contact_id
+--     has a separate conversation_id for the "Started" vs "Completed" event
+conversation_filled as (
+    select
+        * replace (
+            coalesce(
+                started_at,
+                max(started_at) over (
+                    partition by contact_id
+                    order by coalesce(started_at, completed_at)
+                    rows between unbounded preceding and 1 preceding
+                )
+            ) as started_at
+        )
+    from base
+),
+
 -- 2. Score for conversation-level dedupe
 scored as (
     select
@@ -15,7 +32,7 @@ scored as (
         case when completed_at is not null then 2 else 0 end
         + case when vulcan_id is not null then 1 else 0 end
         as score
-    from base
+    from conversation_filled
 ),
 
 -- 3. Pick best row per conversation_id
