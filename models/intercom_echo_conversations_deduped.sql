@@ -25,7 +25,7 @@ conversation_filled as (
                 when started_at is null then
                     concat_ws(
                         ', ',
-                        max_by(tags_applied, started_at) over (
+                        last_value(case when started_at is not null then tags_applied end) ignore nulls over (
                             partition by contact_id
                             order by coalesce(started_at, completed_at)
                             rows between unbounded preceding and 1 preceding
