@@ -20,7 +20,7 @@ with latest_conversation as (
         assignee_email,
         last_closed_by_id,
         _AIRBYTE_RAW_ID
-    from {{ ref('stg_intercom__conversations') }}
+    from {{ ref('stg_conversations') }}
 
     qualify row_number() over (
         partition by conversation_id

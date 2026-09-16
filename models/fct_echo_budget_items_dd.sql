@@ -2,7 +2,7 @@
 
 with deduped as (
     {{ echo_dedupe_rows(
-        ref('fct_intercom__echo_budget_items'),
+        ref('fct_echo_budget_items'),
         require_completed=true,
         completeness_fields=[
             'started_at',

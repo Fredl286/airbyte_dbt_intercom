@@ -3,4 +3,4 @@ select
     name as team_name,
     team_type,
     admin_ids
-from {{ ref('int_intercom__latest_team') }}
+from {{ ref('int_latest_team') }}

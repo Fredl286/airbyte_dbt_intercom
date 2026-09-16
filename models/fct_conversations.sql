@@ -1,6 +1,6 @@
 with latest_conversation as (
     select *
-    from {{ ref('int_intercom__latest_conversation') }}
+    from {{ ref('int_latest_conversation') }}
 ),
 
 conversations as (

@@ -1,6 +1,6 @@
 with teams as (
     select *
-    from {{ ref('stg_intercom__teams') }}
+    from {{ ref('stg_teams') }}
 ),
 
 latest_team as (

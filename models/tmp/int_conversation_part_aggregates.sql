@@ -9,12 +9,12 @@ with conversation_parts as (
         updated_at_timestamp,
         created_at_date,
         updated_at_date
-    from {{ ref('stg_intercom__conversation_parts') }}
+    from {{ ref('stg_conversation_parts') }}
 ),
 
 latest_conversation as (
     select *
-    from {{ ref('int_intercom__latest_conversation') }}
+    from {{ ref('int_latest_conversation') }}
 ),
 
 aggregates as (

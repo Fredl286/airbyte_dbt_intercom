@@ -9,7 +9,7 @@ with conversation_parts as (
         body,
         part_type,
         nullif(trim(body), '') is not null as has_body
-    from {{ ref('stg_intercom__conversation_parts') }}
+    from {{ ref('stg_conversation_parts') }}
 
 ),
 

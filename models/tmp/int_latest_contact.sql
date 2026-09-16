@@ -1,6 +1,6 @@
 with contacts as (
     select *
-    from {{ ref('stg_intercom__contacts') }}
+    from {{ ref('stg_contacts') }}
 ),
 
 --Returns the most recent contact record by creating a row number ordered by the updated_at_timestamp date, then filtering to only return the #1 row per contact.

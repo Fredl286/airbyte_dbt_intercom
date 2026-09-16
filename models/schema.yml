@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: fct_intercom__admin_metrics
+  - name: fct_admin_metrics
     description: >
       Each record represents an individual admin enriched with admin-specific conversation aggregates.
     columns:
@@ -26,7 +26,7 @@ models:
       - name: median_time_to_last_close_minutes
         description: The admin's median time to last closure of a conversation.
 
-  - name: dim_intercom__contacts
+  - name: dim_contacts
     description: >
       Each record represents the latest snapshot of a single contact.
     columns:
@@ -46,7 +46,7 @@ models:
       - name: last_seen_at_timestamp
         description: Most recent time the contact was seen.
 
-  - name: fct_intercom__conversations
+  - name: fct_conversations
     description: >
       Each record represents a single conversation, enriched with data from conversation parts.
     columns:
@@ -82,7 +82,7 @@ models:
       - name: is_read
         description: Whether the conversation message has been read.
 
-  - name: fct_intercom__conversation_metrics
+  - name: fct_conversation_metrics
     description: >
       Each record represents a conversation enriched with aggregates like time to first response and time to close.
     columns:
@@ -110,7 +110,7 @@ models:
       - name: last_closed_by_id
         description: Admin identifier who last closed the conversation.
 
-  - name: fct_intercom__echo_conversations
+  - name: fct_echo_conversations
     description: >
       Each record represents a deduplicated ECHO conversation event enriched with contact financial attributes.
     columns:
@@ -129,7 +129,7 @@ models:
       - name: vulcan_id
         description: Vulcan ID from custom attributes (blank if missing).
 
-  - name: dim_intercom__admins
+  - name: dim_admins
     description: >
       Each record represents a single Intercom admin (agent) with their profile and availability attributes.
     columns:
@@ -157,7 +157,7 @@ models:
       - name: avatar
         description: Avatar object for the admin.
 
-  - name: dim_intercom__teams
+  - name: dim_teams
     description: >
       Each record represents a single Intercom team with its member admin IDs.
     columns:
@@ -173,7 +173,7 @@ models:
       - name: admin_ids
         description: Array of admin IDs that are members of this team.
 
-  - name: dim_intercom__segments
+  - name: dim_segments
     description: >
       Each record represents a single Intercom segment (a saved filter group of contacts or users).
     columns:
@@ -195,7 +195,7 @@ models:
       - name: updated_at_timestamp
         description: Timestamp when the segment was last updated.
 
-  - name: dim_intercom__contact_attributes
+  - name: dim_contact_attributes
     description: >
       Each record represents a single custom or standard contact attribute definition in Intercom.
     columns:

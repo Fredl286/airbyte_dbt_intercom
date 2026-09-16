@@ -1,11 +1,11 @@
 with conversations as (
 	select *
-	from {{ ref('fct_intercom__conversations') }}
+	from {{ ref('fct_conversations') }}
 ),
 
 part_aggregates as (
 	select *
-	from {{ ref('int_intercom__conversation_part_aggregates') }}
+	from {{ ref('int_conversation_part_aggregates') }}
 ),
 
 final as (

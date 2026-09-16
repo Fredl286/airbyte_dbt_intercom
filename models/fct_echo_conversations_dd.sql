@@ -2,7 +2,7 @@
 
 with deduped as (
     {{ echo_dedupe_rows(
-        ref('fct_intercom__echo_conversations'),
+        ref('fct_echo_conversations'),
         completeness_fields=[
             'started_at',
             'completed_at',

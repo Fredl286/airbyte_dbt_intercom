@@ -1,6 +1,6 @@
 with segments as (
     select *
-    from {{ ref('stg_intercom__segments') }}
+    from {{ ref('stg_segments') }}
 ),
 
 latest_segment as (

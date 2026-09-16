@@ -1,6 +1,6 @@
 with contact_attributes as (
     select *
-    from {{ ref('stg_intercom__contact_attributes') }}
+    from {{ ref('stg_contact_attributes') }}
     where attribute_id is not null
 ),
 

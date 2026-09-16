@@ -1,6 +1,6 @@
 with admins as (
     select *
-    from {{ ref('stg_intercom__admins') }}
+    from {{ ref('stg_admins') }}
 ),
 
 latest_admin as (

@@ -6,4 +6,4 @@ select
     person_type,
     created_at_timestamp,
     updated_at_timestamp
-from {{ ref('int_intercom__latest_segment') }}
+from {{ ref('int_latest_segment') }}

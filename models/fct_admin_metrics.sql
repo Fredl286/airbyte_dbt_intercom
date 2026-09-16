@@ -1,11 +1,11 @@
 with admin_table as (
     select *
-    from {{ ref('stg_intercom__admins') }}
+    from {{ ref('stg_admins') }}
 ),
 
 conversation_metrics as (
     select *
-    from {{ ref('fct_intercom__conversation_metrics') }}
+    from {{ ref('fct_conversation_metrics') }}
 ),
 
 admin_conversation_metrics as (
