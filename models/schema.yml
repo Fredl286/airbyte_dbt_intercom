@@ -82,7 +82,7 @@ models:
       - name: is_read
         description: Whether the conversation message has been read.
 
-  - name: fct_conversation_metrics
+  - name: fct_conversations_metrics
     description: >
       Each record represents a conversation enriched with aggregates like time to first response and time to close.
     columns:
@@ -110,7 +110,7 @@ models:
       - name: last_closed_by_id
         description: Admin identifier who last closed the conversation.
 
-  - name: fct_echo_conversations
+  - name: fct_conversations_echo
     description: >
       Each record represents a deduplicated ECHO conversation event enriched with contact financial attributes.
     columns:

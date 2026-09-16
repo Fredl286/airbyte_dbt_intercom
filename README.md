@@ -31,7 +31,7 @@ Macro files:
 
 The ECHO deduped models use a shared macro to enforce consistent conversion logic:
 
-- `fct_echo_conversations_dd`
+- `fct_conversations_echo_dd`
 - `fct_echo_budget_items_dd`
 
 Macro used:
@@ -68,16 +68,16 @@ Primary models currently in use:
 - `dim_tags`
 - `fct_admin_metrics`
 - `fct_conversations`
-- `fct_conversation_metrics`
+- `fct_conversations_metrics`
 - `fct_customer_response_times`
 - `fct_agent_only_responses_3_months`
-- `fct_echo_conversations`
-- `fct_echo_conversations_dd`
+- `fct_conversations_echo`
+- `fct_conversations_echo_dd`
 - `fct_echo_budget_items`
 - `fct_echo_budget_items_dd`
-- `fct_d2a_conversations`
+- `fct_conversations_d2a`
 - `fct_conversations_alltags`
-- `fct_autoug_conversations`
+- `fct_conversations_autoug`
 
 ## Dependencies
 

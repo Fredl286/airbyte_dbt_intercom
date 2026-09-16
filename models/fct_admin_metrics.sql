@@ -5,7 +5,7 @@ with admin_table as (
 
 conversation_metrics as (
     select *
-    from {{ ref('fct_conversation_metrics') }}
+    from {{ ref('fct_conversations_metrics') }}
 ),
 
 admin_conversation_metrics as (
