@@ -31,8 +31,8 @@ Macro files:
 
 The ECHO deduped models use a shared macro to enforce consistent conversion logic:
 
-- `fct_intercom__echo_conversations_deduped`
-- `fct_intercom__echo_budget_items_deduped`
+- `fct_echo_conversations_dd`
+- `fct_echo_budget_items_dd`
 
 Macro used:
 
@@ -60,23 +60,23 @@ This ensures conversion reporting prefers completed and Vulcan-linked ECHO recor
 
 Primary models currently in use:
 
-- `dim_intercom__contacts`
-- `dim_intercom__admins`
-- `dim_intercom__teams`
-- `dim_intercom__segments`
-- `dim_intercom__contact_attributes`
-- `fct_intercom__admin_metrics`
-- `fct_intercom__conversations`
-- `fct_intercom__conversation_metrics`
-- `fct_intercom__customer_response_times`
-- `fct_intercom__agent_only_responses_3_months`
-- `fct_intercom__echo_conversations`
-- `fct_intercom__echo_conversations_deduped`
-- `fct_intercom__echo_budget_items`
-- `fct_intercom__echo_budget_items_deduped`
-- `fct_intercom__d2a_conversations`
-- `fct_intercom__conversations_alltags`
-- `fct_intercom__useful_guides_ugtags`
+- `dim_contacts`
+- `dim_admins`
+- `dim_teams`
+- `dim_segments`
+- `dim_contact_attributes`
+- `fct_admin_metrics`
+- `fct_conversations`
+- `fct_conversation_metrics`
+- `fct_customer_response_times`
+- `fct_agent_only_responses_3_months`
+- `fct_echo_conversations`
+- `fct_echo_conversations_dd`
+- `fct_echo_budget_items`
+- `fct_echo_budget_items_dd`
+- `fct_d2a_conversations`
+- `fct_conversations_alltags`
+- `fct_useful_guides_ugtags`
 
 ## Dependencies
 
