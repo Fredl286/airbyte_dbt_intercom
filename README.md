@@ -101,5 +101,5 @@ Project variables in `dbt_project.yml`:
 Schema Structure:
 
 - Keep raw data in `AIRBYTE_SCHEMA`.
-- Build `models/tmp/*` into `INTERCOM_STAGING_UAT`.
-- Build mart models into `INTERCOM_ANALYTICS_UAT`.
+- Build `models/tmp/*` into `INTERCOM_STAGING`.
+- Build mart models into `INTERCOM_ANALYTICS`.

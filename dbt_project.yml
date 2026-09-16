@@ -18,20 +18,20 @@ clean-targets:
 models: 
   airbyte_intercom: 
     +materialized: table 
-    +schema: "{{ var('intercom_mart_schema', 'intercom_analytics_uat') }}"
+    +schema: "{{ var('intercom_mart_schema', 'intercom_analytics') }}"
     tmp: 
       +materialized: view
-      +schema: "{{ var('intercom_staging_schema', 'intercom_staging_uat') }}"
+      +schema: "{{ var('intercom_staging_schema', 'intercom_staging') }}"
 
 vars:
   # Raw Airbyte schema + database
   intercom_schema: AIRBYTE_SCHEMA
   intercom_database: AIRBYTE_DATABASE
 
-  # Output schemas for test isolation
+  # Output schemas
   # Note: dbt may prefix these with target.schema depending on your adapter macro behavior.
-  intercom_mart_schema: INTERCOM_ANALYTICS_UAT
-  intercom_staging_schema: INTERCOM_STAGING_UAT
+  intercom_mart_schema: INTERCOM_ANALYTICS
+  intercom_staging_schema: INTERCOM_STAGING
 
   # Conversation-related sources
   conversations_conversation_rating: "{{ source('airbyte_intercom','conversation_rating') }}"
