@@ -128,6 +128,14 @@ models:
         description: Comma-separated list of applied tags.
       - name: vulcan_id
         description: Vulcan ID from custom attributes (blank if missing).
+      - name: total_debt_form
+        description: Total debt value from the contact debt form.
+      - name: total_debt_with_ccjs
+        description: Total unsecured debt and CCJs from contact attributes.
+      - name: total_unsecured_debt_vsapi
+        description: Total unsecured debt from VSAPI.
+      - name: clean_total_debt
+        description: Total debt with CCJs when available, otherwise VSAPI unsecured debt.
 
   - name: dim_admins
     description: >
