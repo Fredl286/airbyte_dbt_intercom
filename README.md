@@ -65,6 +65,7 @@ Primary models currently in use:
 - `dim_teams`
 - `dim_segments`
 - `dim_contact_attributes`
+- `dim_tags`
 - `fct_admin_metrics`
 - `fct_conversations`
 - `fct_conversation_metrics`
@@ -76,7 +77,7 @@ Primary models currently in use:
 - `fct_echo_budget_items_dd`
 - `fct_d2a_conversations`
 - `fct_conversations_alltags`
-- `fct_useful_guides_ugtags`
+- `fct_autoug_conversations`
 
 ## Dependencies
 

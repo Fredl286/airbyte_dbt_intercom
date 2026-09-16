@@ -243,6 +243,20 @@ models:
       - name: updated_at_timestamp
         description: Timestamp when the attribute was last updated.
 
+  - name: dim_tags
+    description: >
+      Reference list of tags available in Intercom.
+    columns:
+      - name: id
+        description: Normalized Intercom tag identifier.
+        tests:
+          - not_null
+          - unique
+      - name: name
+        description: Tag name.
+      - name: type
+        description: Intercom tag type.
+
 sources:
   - name: airbyte_intercom
     schema: "{{ var('intercom_schema', 'intercom') }}"
@@ -260,3 +274,4 @@ sources:
       - name: teams
       - name: segments
       - name: contact_attributes
+      - name: tags
