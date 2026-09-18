@@ -15,15 +15,15 @@
 {% endmacro %}
 
 
-{% macro safe_to_number_38_2(field) %}
-    CAST(
-        ROUND(
-            TRY_TO_NUMBER(
-                REGEXP_REPLACE({{ field }}, '[^0-9.\-]', '')
-            ),
-            2
-        ) AS NUMBER(38,2)
-    )
+{% macro safe_to_number_18_2(field) %}
+   CAST(
+       ROUND(
+           TRY_TO_NUMBER(
+               REGEXP_REPLACE({{ field }}, '[^0-9.\-]', '')
+           ),
+           2
+       ) AS NUMBER(18,2)
+   )
 {% endmacro %}
 
 
