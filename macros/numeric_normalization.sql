@@ -22,7 +22,7 @@
                REGEXP_REPLACE({{ field }}, '[^0-9.\-]', '')
            ),
            2
-       ) AS NUMBER(18,2)
+       ) AS NUMBER(26,2)
    )
 {% endmacro %}
 
