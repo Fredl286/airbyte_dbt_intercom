@@ -75,6 +75,7 @@ Primary models currently in use:
 - `fct_conversations_echo_dd`
 - `fct_echo_budget_items`
 - `fct_echo_budget_items_dd`
+- `fct_poly_budget_items`
 - `fct_conversations_d2a`
 - `fct_conversations_alltags`
 - `fct_conversations_autoug`

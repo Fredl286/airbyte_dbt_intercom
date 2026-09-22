@@ -52,7 +52,7 @@ contacts as (
         {{ safe_to_number_38_2('c.custom_attributes:"Monthly TV Licence Cost"::string') }} as monthly_tv_licence_cost,
         {{ safe_to_number_38_2('c.custom_attributes:"Monthly TV, Internet and Subscription costs"::string') }} as monthly_tv_internet_and_subscription_costs,
         {{ safe_to_number_38_2('c.custom_attributes:"Monthly Vehicle Finance Costs"::string') }} as monthly_vehicle_finance_costs,
-        {{ safe_to_number_38_2('c.custom_attributes:"Monthly Vehicle Insurance Cost"::string') }} as monthly_vehicle_insurance_costs,
+        {{ safe_to_number_38_2('c.custom_attributes:"Monthly Vehicle Insurance Cost"::string') }} as monthly_vehicle_insurance_cost,
         {{ safe_to_number_38_2('c.custom_attributes:"Monthly Vehicle Tax Cost"::string') }} as monthly_vehicle_tax_cost,
         {{ safe_to_number_38_2('c.custom_attributes:"Monthly Water Cost"::string') }} as monthly_water_cost,
 
