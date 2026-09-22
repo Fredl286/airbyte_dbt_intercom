@@ -14,7 +14,10 @@ with deduped as (
             'email',
             'surplus',
             'vulcan_surplus',
+            'total_debt_form',
+            'total_debt_with_ccjs',
             'total_unsecured_debt_vsapi',
+            'clean_total_debt',
             'total_household_income',
             'total_household_expenditure'
         ]
@@ -30,7 +33,10 @@ cleaned as (
         {{ normalize_id('vulcan_id_filled') }} as vulcan_id,
         phone,
         email,
+        cast(total_debt_form as number(38,2)) as total_debt_form,
+        cast(total_debt_with_ccjs as number(38,2)) as total_debt_with_ccjs,
         cast(total_unsecured_debt_vsapi as number(38,2)) as total_unsecured_debt,
+        cast(clean_total_debt as number(38,2)) as clean_total_debt,
         cast(total_household_income as number(38,2)) as total_household_income,
         cast(total_household_expenditure as number(38,2)) as total_household_expenditure,
         cast(surplus as number(38,2)) as surplus,
