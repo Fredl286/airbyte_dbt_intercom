@@ -36,7 +36,7 @@ The ECHO deduped models use a shared macro to enforce consistent conversion logi
 
 Macro used:
 
-- `echo_dedupe_rows(...)` in `macros/echo_dedupe.sql`
+- `echo_poly_dedupe_rows(...)` in `macros/echo_dedupe.sql`
 
 Current behavior:
 
@@ -75,7 +75,6 @@ Primary models currently in use:
 - `fct_conversations_echo_dd`
 - `fct_echo_budget_items`
 - `fct_echo_budget_items_dd`
-- `fct_poly_budget_items`
 - `fct_conversations_d2a`
 - `fct_conversations_alltags`
 - `fct_conversations_autoug`
