@@ -1,13 +1,27 @@
 {% macro echo_poly_dedupe_rows(source_relation, require_completed=false, completed_weight=2, vulcan_weight=1, completeness_fields=[]) %}
-with base as (
+with source_data as (
     select *
     from {{ source_relation }}
-    where coalesce(email, '') not ilike '%payplan.com%'
-      and coalesce(email, '') not ilike '%@test.com%'
-        and coalesce(email, '') not ilike '%@payplanpolyconvo.com%'
-        and coalesce(email, '') not ilike '%@payplanpolyconvo.co.uk%'
+),
+excluded_keys as (
+    select distinct conversation_id, contact_id
+    from source_data
+    where coalesce(email, '') ilike '%payplan.com%'
+       or coalesce(email, '') ilike '%@test.com%'
+       or coalesce(email, '') ilike '%@payplanpolyconvo.com%'
+       or coalesce(email, '') ilike '%@payplanpolyconvo.co.uk%'
+),
+base as (
+    select s.*
+    from source_data s
+    where not exists (
+        select 1
+        from excluded_keys e
+        where e.conversation_id = s.conversation_id
+           or e.contact_id = s.contact_id
+    )
       {% if require_completed %}
-      and completed_at is not null
+      and s.completed_at is not null
       {% endif %}
 ),
 scored_conversation as (
