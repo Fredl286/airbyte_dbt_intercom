@@ -30,13 +30,13 @@ contacts as (
             {{ normalize_id('c.id') }} as contact_id,
             {{ normalize_id('c.custom_attributes:"vulcan_id"') }} as vulcan_id,
             c.phone,
-            c.email,
+            coalesce(nullif(c.email, ''), c.customer_attributes:"Email address"::string) as email,
 
-            {{ safe_to_number_38_2('c.custom_attributes:"Surplus"::string') }} as surplus,
-            {{ safe_to_number_38_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
-            {{ safe_to_number_38_2('c.custom_attributes:"Total Unsecured Debt VSAPI"::string') }} as total_unsecured_debt_vsapi,
-            {{ safe_to_number_38_2('c.custom_attributes:"Total Household Income"::string') }} as total_household_income,
-            {{ safe_to_number_38_2('c.custom_attributes:"Total Household Expenditure"::string') }} as total_household_expenditure,
+            {{ safe_to_number_26_2('c.custom_attributes:"Surplus"::string') }} as surplus,
+            {{ safe_to_number_26_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
+            {{ safe_to_number_26_2('c.custom_attributes:"Total Unsecured Debt VSAPI"::string') }} as total_unsecured_debt_vsapi,
+            {{ safe_to_number_26_2('c.custom_attributes:"Total Household Income"::string') }} as total_household_income,
+            {{ safe_to_number_26_2('c.custom_attributes:"Total Household Expenditure"::string') }} as total_household_expenditure,
 
             row_number() over (
                 partition by c.id

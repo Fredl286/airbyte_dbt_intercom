@@ -1,7 +1,7 @@
 {{ config(materialized='table') }}
 
 with deduped as (
-    {{ echo_dedupe_rows(
+    {{ echo_poly_dedupe_rows(
         ref('fct_echo_budget_items'),
         require_completed=true,
         completeness_fields=[

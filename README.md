@@ -18,7 +18,7 @@ This project transforms Intercom data landed by Airbyte into analyst-facing mode
 Additional standards used in marts:
 
 - IDs are normalized to `VARCHAR(50)` using `normalize_id(...)`.
-- Budget/currency fields are normalized to `NUMBER(38,2)` using `safe_to_number_38_2(...)`.
+- Budget/currency fields are normalized to `NUMBER(26,2)` using `safe_to_number_26_2(...)`.
 
 Macro files:
 
@@ -26,17 +26,19 @@ Macro files:
 - `macros/numeric_normalization.sql`
 - `macros/echo_dedupe.sql`
 - `macros/epoch_to_timestamp.sql`
+- `macros/generate_schema_name.sql`
 
 ## ECHO Dedupe Logic
 
-The ECHO deduped models use a shared macro to enforce consistent conversion logic:
+The ECHO/Poly deduped models use a shared macro to enforce consistent conversion logic:
 
 - `fct_conversations_echo_dd`
 - `fct_echo_budget_items_dd`
+- `fct_conversations_poly_dd`
 
 Macro used:
 
-- `echo_dedupe_rows(...)` in `macros/echo_dedupe.sql`
+- `echo_poly_dedupe_rows(...)` in `macros/echo_dedupe.sql`
 
 Current behavior:
 
@@ -75,10 +77,11 @@ Primary models currently in use:
 - `fct_conversations_echo_dd`
 - `fct_echo_budget_items`
 - `fct_echo_budget_items_dd`
-- `fct_poly_budget_items`
 - `fct_conversations_d2a`
 - `fct_conversations_alltags`
 - `fct_conversations_autoug`
+- `fct_conversations_poly`
+- `fct_conversations_poly_dd`
 
 ## Dependencies
 
