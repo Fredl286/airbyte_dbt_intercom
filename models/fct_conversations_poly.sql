@@ -14,7 +14,8 @@ tags_exploded as (
         t.value:"name"::string in (
             'Poly consent asked',
             'Poly start',
-            'Poly complete'
+            'Poly complete',
+            'Poly Assessment Eligible'
         )
         or t.value:"name"::string ilike 'auto ug%'
         or t.value:"name"::string ilike 'poly auto-ug%'
@@ -47,6 +48,10 @@ pivoted as (
                  then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as started_at,
         max(case when te.tag_name = 'Poly complete'
                  then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as completed_at,
+        max(case when te.tag_name = 'Poly Assessment Eligible'
+                 then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as assessment_eligible_at,
+        max(case when te.tag_name = 'Poly Assessment Eligible'
+                 then 1 else 0 end) as assessment_eligible_flag,
         max(case when (te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo')
                  and te.tag_name <> 'Poly Auto-UG start'
                  then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as auto_ug_at,
@@ -68,6 +73,8 @@ select
     p.consent_asked_at,
     p.started_at,
     p.completed_at,
+    p.assessment_eligible_at,
+    p.assessment_eligible_flag,
     p.auto_ug_at,
     p.auto_ug_flag,
     p.ug_tags_applied,
