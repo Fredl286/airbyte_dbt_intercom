@@ -15,7 +15,7 @@
 {% endmacro %}
 
 
-{% macro safe_to_number_38_2(field) %}
+{% macro safe_to_number_26_2(field) %}
    CAST(
        ROUND(
            TRY_TO_NUMBER(

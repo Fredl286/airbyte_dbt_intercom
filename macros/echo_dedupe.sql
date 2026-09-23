@@ -1,9 +1,11 @@
-{% macro echo_dedupe_rows(source_relation, require_completed=false, completed_weight=2, vulcan_weight=1, completeness_fields=[]) %}
+{% macro echo_poly_dedupe_rows(source_relation, require_completed=false, completed_weight=2, vulcan_weight=1, completeness_fields=[]) %}
 with base as (
     select *
     from {{ source_relation }}
     where coalesce(email, '') not ilike '%payplan.com%'
       and coalesce(email, '') not ilike '%@test.com%'
+        and coalesce(email, '') not ilike '%@payplanpolyconvo.com%'
+        and coalesce(email, '') not ilike '%@payplanpolyconvo.co.uk%'
       {% if require_completed %}
       and completed_at is not null
       {% endif %}
