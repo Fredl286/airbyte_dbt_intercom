@@ -42,7 +42,7 @@ Macro used:
 
 Current behavior:
 
-1. Filter out internal/test emails (`%payplan.com%`, `%@test.com%`).
+1. Filter out internal/test emails (`%payplan.com%`, `%@test.com%`, `%@payplanpolyconvo.com%`, `%@payplanpolyconvo.co.uk%`).
 2. Merge records with the same `conversation_id` so split rows are consolidated:
 	- `started_at` keeps the earliest non-null value.
 	- `completed_at` keeps the latest non-null value.
