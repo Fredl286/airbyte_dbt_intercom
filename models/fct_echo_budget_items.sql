@@ -24,7 +24,7 @@ contacts as (
         {{ normalize_id('c.id') }} as contact_id,
         {{ normalize_id('c.custom_attributes:"vulcan_id"') }} as vulcan_id,
         {{ normalize_id('c.phone') }} as phone,
-        coalesce(nullif(c.email, ''), c.custom_attributes:"Email address"::string) as email,
+        coalesce(nullif(c.email, ''), c.custom_attributes:"email_address"::string) as email,
         {{ safe_to_number_26_2('c.custom_attributes:"Surplus"::string') }} as surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"total_debt"::string') }} as total_debt_form,
@@ -98,17 +98,20 @@ pivoted as (
         max(case when te.tag_name = 'Completed ECHO main'
                  then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as completed_at,
 
-        max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+        max(case when (te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo')
+            and te.tag_name <> 'Poly Auto-UG start'
             then {{ epoch_to_timestamp('te.applied_at_unix') }}
         end) as auto_ug_at,
 
-        max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+        max(case when (te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo')
+            and te.tag_name <> 'Poly Auto-UG start'
             then 1 else 0
         end) as auto_ug_flag,
 
-        listagg(distinct case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+        listagg(distinct case when (te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo')
+            and te.tag_name <> 'Poly Auto-UG start'
             then te.tag_name
-        end, ', ') within group (order by case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo' then te.tag_name end) as ug_tags_applied,
+        end, ', ') within group (order by case when (te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo') and te.tag_name <> 'Poly Auto-UG start' then te.tag_name end) as ug_tags_applied,
 
         listagg(distinct te.tag_name, ', ') as tags_applied
 

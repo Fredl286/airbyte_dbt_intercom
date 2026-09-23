@@ -48,7 +48,7 @@ contacts as (
 
 
         {{ normalize_id('c.phone') }} as phone,
-        coalesce(nullif(c.email, ''), c.custom_attributes:"Email address"::string) as email,
+        coalesce(nullif(c.email, ''), c.custom_attributes:"email_address"::string) as email,
 
 
 
