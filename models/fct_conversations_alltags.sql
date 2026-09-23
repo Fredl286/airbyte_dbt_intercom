@@ -21,7 +21,7 @@ contacts as (
         {{ normalize_id('lower(c.custom_attributes:"vulcan_id")') }} as vulcan_id,
 
         c.phone,
-        coalesce(nullif(c.email, ''), c.customer_attributes:"Email address"::string) as email,
+        coalesce(nullif(c.email, ''), c.custom_attributes:"Email address"::string) as email,
 
         {{ safe_to_number_26_2('c.custom_attributes:"Surplus"::string') }} as surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
