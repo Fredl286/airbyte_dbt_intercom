@@ -19,7 +19,7 @@ Additional standards used in marts:
 
 - IDs are normalized to `VARCHAR(50)` using `normalize_id(...)` (this includes `phone`).
 - Budget/currency fields are normalized to `NUMBER(26,2)` using `safe_to_number_26_2(...)`.
-- Contact email falls back to custom attributes when blank: `coalesce(nullif(c.email, ''), c.custom_attributes:"Email address"::string)`.
+- Contact email falls back to custom attributes when blank: `coalesce(nullif(c.email, ''), c.custom_attributes:"email_address"::string)`.
 - Auto-UG tags are matched by pattern rather than a hardcoded list, so new tag variants don't require code changes: `tag_name ilike 'auto ug%'`, `tag_name ilike 'poly auto-ug%'`, or `tag_name = 'aug echo'`.
 
 Macro files:
