@@ -10,11 +10,16 @@ tags_exploded as (
         {{ normalize_id('r.contacts:"contacts"[0]:"id"') }} as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in (
-        'Started ECHO Main',
-        'Completed ECHO main',
-        '15K+ Agent (C) 31Mar26 Split test',
-        '33% Helpline Triage Split test 15k D2A 09-07-2026 (A)'
+    where (
+        t.value:"name"::string in (
+            'Started ECHO Main',
+            'Completed ECHO main',
+            '15K+ Agent (C) 31Mar26 Split test',
+            '33% Helpline Triage Split test 15k D2A 09-07-2026 (A)'
+        )
+        or t.value:"name"::string ilike 'auto ug%'
+        or t.value:"name"::string ilike 'poly auto-ug%'
+        or t.value:"name"::string = 'aug echo'
     )
 ),
 contacts as (
@@ -46,6 +51,12 @@ pivoted as (
                     '33% Helpline Triage Split test 15k D2A 09-07-2026 (A)'
                  )
                  then 1 else 0 end) as d2a_flag,
+        max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+                 then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as auto_ug_at,
+        max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+                 then 1 else 0 end) as auto_ug_flag,
+        listagg(distinct case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+                 then te.tag_name end, ', ') within group (order by te.tag_name) as ug_tags_applied,
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
@@ -58,6 +69,9 @@ select
     p.started_at,
     p.completed_at,
     p.d2a_flag,
+    p.auto_ug_at,
+    p.auto_ug_flag,
+    p.ug_tags_applied,
     p.tags_applied,
     ct.vulcan_id,
     ct.phone,

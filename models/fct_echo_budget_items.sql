@@ -11,17 +11,11 @@ tags_exploded as (
         {{ normalize_id('r.contacts:"contacts"[0]:"id"') }} as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string IN (
-        'Auto UG | Error',
-        'AUTO UG - Not Sent',
-        'Auto UG - DMP/DAS',
-        'auto ug | error | no debt level',
-        'Auto UG | Error 19-02-26',
-        'aug echo',
-        'Auto UG - Short Time To Repay',
-        'Auto UG - Zero Offer',
-        'Started ECHO Main',
-        'Completed ECHO main'
+    where (
+        t.value:"name"::string ilike 'auto ug%'
+        or t.value:"name"::string ilike 'poly auto-ug%'
+        or t.value:"name"::string = 'aug echo'
+        or t.value:"name"::string in ('Started ECHO Main', 'Completed ECHO main')
     )
 ),
 
@@ -31,7 +25,6 @@ contacts as (
         {{ normalize_id('c.custom_attributes:"vulcan_id"') }} as vulcan_id,
         {{ normalize_id('c.phone') }} as phone,
         coalesce(nullif(c.email, ''), c.custom_attributes:"Email address"::string) as email,
-
         {{ safe_to_number_26_2('c.custom_attributes:"Surplus"::string') }} as surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"total_debt"::string') }} as total_debt_form,
@@ -40,7 +33,6 @@ contacts as (
         coalesce(total_debt_with_ccjs, total_unsecured_debt_vsapi) as clean_total_debt,
         {{ safe_to_number_26_2('c.custom_attributes:"Total Household Income"::string') }} as total_household_income,
         {{ safe_to_number_26_2('c.custom_attributes:"Total Household Expenditure"::string') }} as total_household_expenditure,
-
         {{ safe_to_number_26_2('c.custom_attributes:"monthly buildings and content insurance cost"::string') }} as monthly_buildings_and_content_insurance_cost,
         {{ safe_to_number_26_2('c.custom_attributes:"Monthly Child Maintenance Payment"::string') }} as monthly_child_maintenance_payment,
         {{ safe_to_number_26_2('c.custom_attributes:"monthly childcare costs"::string') }} as monthly_childcare_costs,
@@ -65,7 +57,6 @@ contacts as (
         {{ safe_to_number_26_2('c.custom_attributes:"Monthly Vehicle Insurance Cost"::string') }} as monthly_vehicle_insurance_cost,
         {{ safe_to_number_26_2('c.custom_attributes:"Monthly Vehicle Tax Cost"::string') }} as monthly_vehicle_tax_cost,
         {{ safe_to_number_26_2('c.custom_attributes:"Monthly Water Cost"::string') }} as monthly_water_cost,
-
         {{ safe_to_number_26_2('c.custom_attributes:"Buildings and Contents"::string') }} as buildings_and_contents,
         {{ safe_to_number_26_2('c.custom_attributes:"Bundle Costs"::string') }} as bundle_costs,
         {{ safe_to_number_26_2('c.custom_attributes:"Car Maintenance"::string') }} as car_maintenance,
@@ -107,18 +98,17 @@ pivoted as (
         max(case when te.tag_name = 'Completed ECHO main'
                  then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as completed_at,
 
-        max(case when te.tag_name in (
-                'Auto UG | Error',
-                'AUTO UG - Not Sent',
-                'Auto UG - DMP/DAS',
-                'auto ug | error | no debt level',
-                'Auto UG | Error 19-02-26',
-                'aug echo',
-                'Auto UG - Short Time To Repay',
-                'Auto UG - Zero Offer'
-            )
+        max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
             then {{ epoch_to_timestamp('te.applied_at_unix') }}
         end) as auto_ug_at,
+
+        max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+            then 1 else 0
+        end) as auto_ug_flag,
+
+        listagg(distinct case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+            then te.tag_name
+        end, ', ') within group (order by te.tag_name) as ug_tags_applied,
 
         listagg(distinct te.tag_name, ', ') as tags_applied
 

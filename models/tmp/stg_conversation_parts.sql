@@ -16,7 +16,7 @@ with conversation_parts as (
         {{ epoch_to_timestamp('created_at') }} as created_at_date,
         {{ epoch_to_timestamp('updated_at') }} as updated_at_date,
 
-        AUTHOR:id::string as author_id,
+        {{ normalize_id('AUTHOR:id::string') }} as author_id,
         AUTHOR:type::string as author_type,
 
         body,

@@ -10,10 +10,15 @@ tags_exploded as (
         {{ normalize_id('r.contacts:"contacts"[0]:"id"') }} as contact_id
     from raw r,
          lateral flatten(input => r.tags:"tags") t
-    where t.value:"name"::string in (
-        'Poly consent asked',
-        'Poly start',
-        'Poly complete'
+    where (
+        t.value:"name"::string in (
+            'Poly consent asked',
+            'Poly start',
+            'Poly complete'
+        )
+        or t.value:"name"::string ilike 'auto ug%'
+        or t.value:"name"::string ilike 'poly auto-ug%'
+        or t.value:"name"::string = 'aug echo'
     )
 ),
 contacts as (
@@ -42,6 +47,12 @@ pivoted as (
                  then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as started_at,
         max(case when te.tag_name = 'Poly complete'
                  then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as completed_at,
+        max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+                 then {{ epoch_to_timestamp('te.applied_at_unix') }} end) as auto_ug_at,
+        max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+                 then 1 else 0 end) as auto_ug_flag,
+        listagg(distinct case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
+                 then te.tag_name end, ', ') within group (order by te.tag_name) as ug_tags_applied,
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
@@ -54,6 +65,9 @@ select
     p.consent_asked_at,
     p.started_at,
     p.completed_at,
+    p.auto_ug_at,
+    p.auto_ug_flag,
+    p.ug_tags_applied,
     p.tags_applied,
     ct.vulcan_id,
     ct.phone,
