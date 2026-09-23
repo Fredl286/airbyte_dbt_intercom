@@ -17,8 +17,10 @@ This project transforms Intercom data landed by Airbyte into analyst-facing mode
 
 Additional standards used in marts:
 
-- IDs are normalized to `VARCHAR(50)` using `normalize_id(...)`.
+- IDs are normalized to `VARCHAR(50)` using `normalize_id(...)` (this includes `phone`).
 - Budget/currency fields are normalized to `NUMBER(26,2)` using `safe_to_number_26_2(...)`.
+- Contact email falls back to custom attributes when blank: `coalesce(nullif(c.email, ''), c.custom_attributes:"Email address"::string)`.
+- Auto-UG tags are matched by pattern rather than a hardcoded list, so new tag variants don't require code changes: `tag_name ilike 'auto ug%'`, `tag_name ilike 'poly auto-ug%'`, or `tag_name = 'aug echo'`.
 
 Macro files:
 
@@ -47,6 +49,7 @@ Current behavior:
 	- `started_at` keeps the earliest non-null value.
 	- `completed_at` keeps the latest non-null value.
 	- `tags_applied` is combined across rows (distinct values).
+	- `auto_ug_flag` (1/0) and `ug_tags_applied` (distinct list of matching tags) track whether any Auto-UG tag was applied, alongside `auto_ug_at`.
 3. Build a person key using this fallback order:
 	- `contact_id`, then `email`, then `phone`, then `conversation_id`.
 4. Keep one record per person per day (`person_key` + `event_date`).
