@@ -60,7 +60,7 @@ pivoted as (
         listagg(distinct case when (te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo')
                  and te.tag_name <> 'Poly Auto-UG start'
                  then te.tag_name end, ', ') within group (order by case when (te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo') and te.tag_name <> 'Poly Auto-UG start' then te.tag_name end) as ug_tags_applied,
-        listagg(distinct te.tag_name, ', ') as tags_applied
+        listagg(distinct case when te.tag_name <> 'Poly Auto-UG start' then te.tag_name end, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
     having max(case when te.tag_name in ('Started ECHO Main', 'Completed ECHO main')
