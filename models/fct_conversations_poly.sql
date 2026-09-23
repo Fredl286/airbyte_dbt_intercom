@@ -22,6 +22,7 @@ contacts as (
         {{ normalize_id('c.custom_attributes:"vulcan_id"') }} as vulcan_id,
         c.phone,
         c.email,
+        c.custom_attributes:"Email address" as Email address custom,
         {{ safe_to_number_38_2('c.custom_attributes:"Surplus"::string') }} as surplus,
         {{ safe_to_number_38_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
         {{ safe_to_number_38_2('c.custom_attributes:"total_debt"::string') }} as total_debt_form,
