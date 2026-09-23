@@ -48,7 +48,7 @@ contacts as (
 
 
         c.phone,
-        coalesce(nullif(c.email, ''), c.customer_attributes:"Email address"::string) as email,
+        coalesce(nullif(c.email, ''), c.custom_attributes:"Email address"::string) as email,
 
 
 

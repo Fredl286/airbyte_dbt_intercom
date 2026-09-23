@@ -33,7 +33,7 @@ contacts as (
         {{ safe_to_number_38_2('c.custom_attributes:"Total Household Income"::string') }} as total_household_income,
         {{ safe_to_number_38_2('c.custom_attributes:"Total Household Expenditure"::string') }} as total_household_expenditure
 =======
-        coalesce(nullif(c.email, ''), c.customer_attributes:"Email address"::string) as email,
+        coalesce(nullif(c.email, ''), c.custom_attributes:"Email address"::string) as email,
         {{ safe_to_number_26_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"total_debt"::string') }} as total_debt_form,
         {{ safe_to_number_26_2('c.custom_attributes:"TotalUnsecuredAndCcjs"::string') }} as total_debt_with_ccjs,
