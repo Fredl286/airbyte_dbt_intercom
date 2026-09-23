@@ -108,7 +108,7 @@ pivoted as (
 
         listagg(distinct case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
             then te.tag_name
-        end, ', ') within group (order by te.tag_name) as ug_tags_applied,
+        end, ', ') within group (order by case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo' then te.tag_name end) as ug_tags_applied,
 
         listagg(distinct te.tag_name, ', ') as tags_applied
 

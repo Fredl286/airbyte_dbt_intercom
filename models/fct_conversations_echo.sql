@@ -56,7 +56,7 @@ pivoted as (
         max(case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
                  then 1 else 0 end) as auto_ug_flag,
         listagg(distinct case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo'
-                 then te.tag_name end, ', ') within group (order by te.tag_name) as ug_tags_applied,
+                 then te.tag_name end, ', ') within group (order by case when te.tag_name ilike 'auto ug%' or te.tag_name ilike 'poly auto-ug%' or te.tag_name = 'aug echo' then te.tag_name end) as ug_tags_applied,
         listagg(distinct te.tag_name, ', ') as tags_applied
     from tags_exploded te
     group by te.conversation_id, te.contact_id
