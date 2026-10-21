@@ -83,8 +83,8 @@ contacts as (
         {{ safe_to_number_26_2('c.custom_attributes:"Childcare Costs"::string') }} as childcare_costs,
         {{ safe_to_number_26_2('c.custom_attributes:"Hobbies and Leisure"::string') }} as hobbies_and_leisure,
         {{ safe_to_number_26_2('c.custom_attributes:"Public Transport"::string') }}         as public_transport,
-                {{ safe_to_number_26_2('c.custom_attributes:"Additional Costs"::string') }} as additional_costs,
-                {{ safe_to_number_26_2('c.custom_attributes:"Additional Cost"::string') }} as additional_cost
+        {{ safe_to_number_26_2('c.custom_attributes:"Additional Costs"::string') }} as additional_costs,
+        {{ safe_to_number_26_2('c.custom_attributes:"Additional Cost"::string') }} as additional_cost
 
             from {{ source('airbyte_intercom','contacts') }} c
 ),
