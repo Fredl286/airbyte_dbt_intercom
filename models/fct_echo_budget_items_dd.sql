@@ -36,7 +36,7 @@ cleaned as (
         tags_applied,
         {{ normalize_id('vulcan_id_filled') }} as vulcan_id,
         phone,
-        email,
+        email::varchar(255) as email,
         total_debt_form,
         total_debt_with_ccjs,
         total_unsecured_debt_vsapi as total_unsecured_debt,
@@ -93,7 +93,9 @@ cleaned as (
         water,
         childcare_costs,
         hobbies_and_leisure,
-        public_transport
+        public_transport,
+        additional_costs,
+        additional_cost
     from deduped
 )
 

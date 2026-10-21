@@ -39,7 +39,7 @@ cleaned as (
         tags_applied,
         {{ normalize_id('vulcan_id_filled') }} as vulcan_id,
         phone,
-        email,
+        email::varchar(255) as email,
         vulcan_surplus,
         total_debt_form,
         total_debt_with_ccjs,

@@ -24,7 +24,7 @@ contacts as (
         {{ normalize_id('c.id') }} as contact_id,
         {{ normalize_id('c.custom_attributes:"vulcan_id"') }} as vulcan_id,
         {{ normalize_id('c.phone') }} as phone,
-        coalesce(nullif(c.email, ''), c.custom_attributes:"email_address"::string) as email,
+        coalesce(nullif(c.email, ''), c.custom_attributes:"email_address"::string)::varchar(255) as email,
         {{ safe_to_number_26_2('c.custom_attributes:"Surplus"::string') }} as surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"total_debt"::string') }} as total_debt_form,
@@ -82,9 +82,11 @@ contacts as (
         {{ safe_to_number_26_2('c.custom_attributes:"Water"::string') }} as water,
         {{ safe_to_number_26_2('c.custom_attributes:"Childcare Costs"::string') }} as childcare_costs,
         {{ safe_to_number_26_2('c.custom_attributes:"Hobbies and Leisure"::string') }} as hobbies_and_leisure,
-        {{ safe_to_number_26_2('c.custom_attributes:"Public Transport"::string') }} as public_transport
+        {{ safe_to_number_26_2('c.custom_attributes:"Public Transport"::string') }}         as public_transport,
+                {{ safe_to_number_26_2('c.custom_attributes:"Additional Costs"::string') }} as additional_costs,
+                {{ safe_to_number_26_2('c.custom_attributes:"Additional Cost"::string') }} as additional_cost
 
-    from {{ source('airbyte_intercom','contacts') }} c
+            from {{ source('airbyte_intercom','contacts') }} c
 ),
 
 pivoted as (

@@ -2,7 +2,7 @@ select
     admin_id,
     name as admin_name,
     admin_type,
-    email,
+    email::varchar(255) as email,
     job_title,
     has_inbox_seat,
     away_mode_enabled,

@@ -6,7 +6,7 @@ with raw as (
 tags_exploded as (
     select distinct
         {{ normalize_id('r.id') }} as conversation_id,
-        t.value:"name"::string as tag_name,
+        t.value:"name"::varchar(255) as tag_name,
         t.value:"applied_at"::bigint as applied_at_unix,
         {{ epoch_to_timestamp('t.value:"applied_at"::bigint') }} as tag_applied_at,
         {{ normalize_id('r.contacts:"contacts"[0]:"id"') }} as contact_id
@@ -19,7 +19,7 @@ contacts as (
         {{ normalize_id('c.id') }} as contact_id,
         {{ normalize_id('lower(c.custom_attributes:"vulcan_id")') }} as vulcan_id,
         {{ normalize_id('c.phone') }} as phone,
-        coalesce(nullif(c.email, ''), c.custom_attributes:"email_address"::string) as email,
+        coalesce(nullif(c.email, ''), c.custom_attributes:"email_address"::string)::varchar(255) as email,
         {{ safe_to_number_26_2('c.custom_attributes:"Surplus"::string') }} as surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"Vulcan Surplus"::string') }} as vulcan_surplus,
         {{ safe_to_number_26_2('c.custom_attributes:"total_debt"::string') }} as total_debt_form,
