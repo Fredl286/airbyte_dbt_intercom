@@ -90,7 +90,6 @@ Primary models currently in use:
 
 Defined in `packages.yml`:
 
-- `fivetran/fivetran_utils`
 - `godatadriven/dbt_date`
 
 `package-lock.yml` is committed for reproducible dependency resolution.
