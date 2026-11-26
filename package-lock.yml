@@ -1,8 +1,11 @@
 packages:
+  - name: fivetran_utils
+    package: fivetran/fivetran_utils
+    version: 0.4.11
   - name: dbt_date
     package: godatadriven/dbt_date
     version: 0.10.1
   - name: dbt_utils
     package: dbt-labs/dbt_utils
     version: 1.4.1
-sha1_hash: bb1e19b18a192d3cf0c5327e95f98d8982e423a8
+sha1_hash: 0dce97044ada125e547dff88345f5492056a350b
